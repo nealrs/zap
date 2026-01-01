@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0575e6">
+    <link rel="manifest" href="assets/manifest.json">
+    <title>Bubble Zap 3D</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            touch-action: none; 
+        }
+        canvas { 
+            display: block; 
+            width: 100vw; 
+            height: 100vh; 
+        }
+        
+        #ui-layer {
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            pointer-events: none; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            padding: 20px; 
+            box-sizing: border-box; 
+            z-index: 10;
+        }
+
+        .hud-top {
+            display: flex; 
+            justify-content: space-between; 
+            width: 100%; 
+            max-width: 800px; 
+            margin: 0 auto;
+            color: white; 
+            font-size: 18px; 
+            font-weight: bold; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #overlay {
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%);
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 100; 
+            transition: opacity 0.4s ease;
+        }
+
+        #overlay.hidden { 
+            opacity: 0; 
+            pointer-events: none; 
+        }
+
+        .panel {
+            background: transparent;
+            padding: 40px; 
+            text-align: center; 
+            max-width: 80%;
+        }
+
+        h1 {
+            color: #fff; 
+            font-size: clamp(32px, 8vw, 64px); 
+            margin: 0;
+            background: linear-gradient(45deg, #00f260, #0575e6);
+            background-clip: text;
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        h2 { 
+            color: #4facfe; 
+            font-weight: 300; 
+            margin: 10px 0 20px 0; 
+        }
+        
+        p { 
+            color: #ccc; 
+            margin-bottom: 30px; 
+            line-height: 1.5; 
+        }
+
+        button {
+            background: #fff; 
+            color: #000; 
+            border: none; 
+            padding: 16px 60px;
+            font-size: 20px; 
+            font-weight: bold; 
+            border-radius: 50px; 
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            pointer-events: auto;
+        }
+
+        button:hover { 
+            transform: scale(1.05); 
+            background: #4facfe; 
+            color: #fff; 
+        }
+
+        #overlay.hidden button {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div>LVL: <span id="level-el" style="color:#ffeb3b">1</span></div>
+            <div>POPS: <span id="score-el" style="color:#4facfe">0</span> / <span id="target-el">10</span></div>
+            <div>TIME: <span id="time-el" style="color:#ff4b2b">0</span>s</div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <div class="panel">
+            <h1 id="main-title">BUBBLE ZAP</h1>
+            <h2 id="sub-title">Loading...</h2>
+            <p id="level-desc">Prepare for the void.</p>
+            <button id="start-btn">START</button>
+        </div>
+    </div>
+
+    <!-- Three.js Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Special Bubbles Config -->
+    <script src="js/specialbubbles.js"></script>
+
+    <!-- Hazard Module -->
+    <script src="js/hazards.js"></script>
+
+    <!-- Game Logic -->
+    <script src="js/game.js"></script>
+
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        // Conditionally register service worker based on environment
+        if ('serviceWorker' in navigator) {
+            fetch('/api/env')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.env !== 'dev') {
+                        navigator.serviceWorker.register('./js/sw.js').catch(err => {
+                            console.log('Service Worker registration failed:', err);
+                        });
+                    } else {
+                        console.log('Service Worker disabled in dev mode');
+                        // Unregister any existing service workers in dev
+                        navigator.serviceWorker.getRegistrations().then(registrations => {
+                            for (let registration of registrations) {
+                                registration.unregister();
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.log('Failed to check environment, defaulting to no service worker:', err);
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+[
+  {
+    "name": "The Void",
+    "desc": "Basic bubble popping in zero-G. Get a feel for the physics.",
+    "target": 12,
+    "time": 40,
+    "count": 15,
+    "size": 1.2,
+    "gravity": 0.00008,
+    "color": "0xffff00",
+    "respawnBubbles": false,
+    "respawnRate": 0,
+    "hazards": [],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
+    "name": "Floating Garden",
+    "desc": "A comet trails through space, pulling bubbles in its wake. Watch out for its path!",
+    "target": 18,
+    "time": 45,
+    "count": 22,
+    "size": 1.0,
+    "gravity": 0.0001,
+    "color": "0x00ff88",
+    "respawnBubbles": false,
+    "respawnRate": 0,
+    "hazards": [
+      {
+        "type": "comet",
+        "pos": [0, 5, 0],
+        "r": 12,
+        "s": 0.005,
+        "moveSpeed": 0.03
+      }
+    ],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
+    "name": "Event Horizon",
+    "desc": "Wormholes suck bubbles in and teleport them. Adapt your strategy!",
+    "target": 20,
+    "time": 50,
+    "count": 24,
+    "size": 0.95,
+    "gravity": 0.00015,
+    "color": "0xff1493",
+    "respawnBubbles": false,
+    "respawnRate": 0,
+    "hazards": [
+      {
+        "type": "wormhole",
+        "pos": [-9, 0, 0],
+        "r": 7,
+        "s": 0.025
+      }
+    ],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
+    "name": "Dual Vortex",
+    "desc": "Two wormholes create a chaotic field. Stay focused!",
+    "target": 25,
+    "time": 55,
+    "count": 30,
+    "size": 0.9,
+    "gravity": 0.0002,
+    "color": "0x00d4ff",
+    "respawnBubbles": false,
+    "respawnRate": 0,
+    "hazards": [
+      {
+        "type": "wormhole",
+        "pos": [8, 0, 0],
+  "r": 7,
+        "s": 0.03
+      },
+      {
+        "type": "wormhole",
+        "pos": [-8, 0, 0],
+        "r": 5,
+        "s": 0.03
+      }
+    ],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
+    "name": "The Repulsor Core",
+    "desc": "A repulsor pushes everything away. Hunt the fleeing bubbles!",
+    "target": 30,
+    "time": 60,
+    "count": 28,
+    "size": 0.85,
+    "gravity": 0.00025,
+    "color": "0xff6600",
+    "respawnBubbles": true,
+    "respawnRate": 3,
+    "hazards": [
+      {
+        "type": "repulsor",
+        "pos": [0, 0, 0],
+        "r": 8,
+        "s": 0.045
+      }
+    ],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
+    "name": "Bouncing Chaos",
+    "desc": "Bumpers reflect bubbles in wild directions. Time your pops!",
+    "target": 28,
+    "time": 55,
+    "count": 26,
+    "size": 0.88,
+    "gravity": 0.00028,
+    "color": "0xffaa00",
+    "respawnBubbles": true,
+    "respawnRate": 4,
+    "hazards": [
+      {
+        "type": "bumper",
+        "pos": [0, 0, 0],
+        "r": 6,
+        "s": 0.065
+      }
+    ],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
+    "name": "Wormhole Madness",
+    "desc": "Wormholes with time bonuses. Use the bonuses wisely!",
+    "target": 35,
+    "time": 50,
+    "count": 32,
+    "size": 0.8,
+    "gravity": 0.0003,
+    "color": "0xff33ff",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "hazards": [
+      {
+        "type": "wormhole",
+        "pos": [0, 6, 0],
+        "r": 6,
+        "s": 0.04
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["timebonus"],
+      "spawnIntervalSeconds": 2
+    }
+  },
+  {
+    "name": "Repulsor Onslaught",
+    "desc": "Repulsor + points bonuses. Pop as many as you can!",
+    "target": 30,
+    "time": 60,
+    "count": 29,
+    "size": 0.85,
+    "gravity": 0.00025,
+    "color": "0xff9900",
+    "respawnBubbles": true,
+    "respawnRate": 1,
+    "hazards": [
+      {
+        "type": "repulsor",
+        "pos": [0, 0, 0],
+        "r": 9,
+        "s": 0.042
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["pointsbonus"],
+      "spawnIntervalSeconds": 2.5
+    }
+  },
+  {
+    "name": "Vortex Eruption",
+    "desc": "Wormhole meets slow-motion. Master the impossible!",
+    "target": 42,
+    "time": 58,
+    "count": 38,
+    "size": 0.78,
+    "gravity": 0.0004,
+    "color": "0xff0066",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "hazards": [
+      {
+        "type": "wormhole",
+        "pos": [-6, 6, 0],
+        "r": 7,
+        "s": 0.05
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["slowmo"],
+      "spawnIntervalSeconds": 7
+    }
+  },
+  {
+    "name": "Explosion Protocol",
+    "desc": "Multipop special bubbles in a repulsor field. Chain reactions!",
+    "target": 45,
+    "time": 60,
+    "count": 40,
+    "size": 0.75,
+    "gravity": 0.0005,
+    "color": "0x00ff00",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "hazards": [
+      {
+        "type": "repulsor",
+        "pos": [0, 0, 0],
+        "r": 10,
+        "s": 0.065
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["multipop"],
+      "spawnIntervalSeconds": 5.5
+    }
+  }
+]

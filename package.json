@@ -1,0 +1,14 @@
+{
+  "name": "bubble-zap-3d",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Bubble Zap 3D Game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "ENV=dev node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

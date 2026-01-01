@@ -1,0 +1,71 @@
+{
+  "hazardTypes": {
+    "wormhole": {
+      "description": "Attracts bubbles and teleports them",
+      "geometry": "torusknot",
+      "color": 6619647,
+      "emissive": 2162758,
+      "physics": {
+        "attractive": true,
+        "teleportDistance": 0.7,
+        "exitVelocityMultiplier": 0.3
+      }
+    },
+    "repulsor": {
+      "description": "Pushes bubbles away from center",
+      "geometry": "icosahedron",
+      "color": 16755200,
+      "wireframe": true,
+      "physics": {
+        "attractive": false,
+        "forceMultiplier": 1.8
+      }
+    },
+    "bumper": {
+      "description": "Bounces bubbles with increased velocity",
+      "geometry": "dodecahedron",
+      "color": 16776960,
+      "emissive": 8355840,
+      "physics": {
+        "attractive": false,
+        "bounceForceMultiplier": 2.2,
+        "bounceVelocityMultiplier": 1.5
+      }
+    },
+    "comet": {
+      "description": "Moves randomly and attracts bubbles in a trail",
+      "geometry": "sphere",
+      "color": 65535,
+      "emissive": 43775,
+      "physics": {
+        "attractive": true,
+        "moveSpeed": 0.05,
+        "trailStrength": 0.015,
+        "maxTrailingBubbles": 20
+      }
+    }
+  },
+  "hazardDefaults": {
+    "wormhole": {
+      "r": 5,
+      "s": 0.03,
+      "rotationSpeed": 0.02
+    },
+    "repulsor": {
+      "r": 8,
+      "s": 0.05,
+      "rotationSpeed": 0.02
+    },
+    "bumper": {
+      "r": 6,
+      "s": 0.06,
+      "rotationSpeed": 0.04
+    },
+    "comet": {
+      "r": 12,
+      "s": 0.015,
+      "rotationSpeed": 0.0,
+      "moveSpeed": 0.03
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "interaction": {
+    "bubbleHitZoneTolerance": 1.1,
+    "comment": "bubbleHitZoneTolerance: Multiplier for bubble click radius (1.1 = 10% larger hit zone)"
+  },
+  "graphics": {
+    "antialias": true,
+    "maxPixelRatio": 2,
+    "starfieldCount": 800
+  },
+  "camera": {
+    "fov": 60,
+    "initialPosition": {
+      "x": 0,
+      "y": 0,
+      "z": 25
+    }
+  },
+  "controls": {
+    "enableDamping": true,
+    "autoRotate": true,
+    "autoRotateSpeed": 0.5
+  },
+  "audio": {
+    "popSoundFrequencyStart": 800,
+    "popSoundFrequencyEnd": 100,
+    "popSoundDuration": 0.1,
+    "popSoundVolume": 0.8
+  },
+  "particles": {
+    "burstCount": 12,
+    "burstSpeed": 0.3,
+    "burstSpeedVariance": 0.2,
+    "lifetime": 0.6
+  },
+  "colors": {
+    "comment": "Color palettes to ensure bubbles and hazards don't clash",
+    "bubbleColors": [
+      "0xffff00",
+      "0x00ff88",
+      "0xff1493",
+      "0x00d4ff",
+      "0xff6600",
+      "0xff9900",
+      "0xff33ff",
+      "0xff0066",
+      "0x00ff00",
+      "0xff3366"
+    ],
+    "hazardColors": {
+      "wormhole": "0x6500ff",
+      "repulsor": "0xffaa00",
+      "bumper": "0xffff00",
+      "comet": "0x00ffff"
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "specialBubbleTypes": {
+    "timebonus": {
+      "description": "Adds extra seconds to the clock",
+      "color": "0xff00ff",
+      "icon": "⏱",
+      "effect": {
+        "type": "timebonus",
+        "amount": 5,
+        "description": "+5 seconds"
+      },
+      "visual": {
+        "glowColor": 16711935,
+        "glowIntensity": 0.8,
+        "pulseSpeed": 0.05,
+        "scale": 1.3
+      }
+    },
+    "pointsbonus": {
+      "description": "Awards extra points toward the target",
+      "color": "0xffd700",
+      "icon": "⭐",
+      "effect": {
+        "type": "pointsbonus",
+        "amount": 3,
+        "description": "+3 pops"
+      },
+      "visual": {
+        "glowColor": 16766720,
+        "glowIntensity": 0.6,
+        "pulseSpeed": 0.03,
+        "scale": 1.2
+      }
+    },
+    "multipop": {
+      "description": "Pop bubbles near it automatically",
+      "color": "0x00aaff",
+      "icon": "💥",
+      "effect": {
+        "type": "multipop",
+        "radius": 8,
+        "popCount": 5,
+        "description": "Explode nearby bubbles"
+      },
+      "visual": {
+        "glowColor": 43775,
+        "glowIntensity": 1.0,
+        "pulseSpeed": 0.08,
+        "scale": 1.4,
+        "particleEffect": true
+      }
+    },
+    "slowmo": {
+      "description": "Slows down bubble physics temporarily",
+      "color": "0x00ff00",
+      "icon": "🐢",
+      "effect": {
+        "type": "slowmo",
+        "durationSeconds": 8,
+        "speedMultiplier": 0.5,
+        "description": "Slow motion 8s"
+      },
+      "visual": {
+        "glowColor": 65280,
+        "glowIntensity": 0.7,
+        "pulseSpeed": 0.01,
+        "scale": 1.15
+      }
+    },
+    "shield": {
+      "description": "Protect one bubble from being affected by hazards",
+      "color": "0x4169e1",
+      "icon": "🛡",
+      "effect": {
+        "type": "shield",
+        "bubbleCount": 1,
+        "durationSeconds": 15,
+        "description": "Bubble immunity"
+      },
+      "visual": {
+        "glowColor": 4351201,
+        "glowIntensity": 0.9,
+        "pulseSpeed": 0.04,
+        "scale": 1.25
+      }
+    },
+    "magnetize": {
+      "description": "Bubbles drift toward your cursor",
+      "color": "0xff6600",
+      "icon": "🧲",
+      "effect": {
+        "type": "magnetize",
+        "durationSeconds": 6,
+        "attractionForce": 0.01,
+        "description": "Attract bubbles 6s"
+      },
+      "visual": {
+        "glowColor": 16744448,
+        "glowIntensity": 0.75,
+        "pulseSpeed": 0.06,
+        "scale": 1.2
+      }
+    }
+  },
+  "spawnConfig": {
+    "global": {
+      "checkFrequency": 30,
+      "rarityTreshold": 0.7,
+      "maxActivePerType": 3
+    },
+    "level": {
+      "enabled": true,
+      "spawnChancePerSecond": 0.15,
+      "maxConcurrent": 5,
+      "clusterSpawning": false,
+      "clusterRadius": 0
+    }
+  }
+}

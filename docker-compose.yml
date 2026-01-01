@@ -1,0 +1,24 @@
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - ENV=production
+      - PORT=3000
+    restart: unless-stopped
+
+  dev:
+    build: .
+    ports:
+      - "1337:3000"
+    environment:
+      - ENV=dev
+      - PORT=3000
+    volumes:
+      - ./app:/app/app
+      - ./server.js:/app/server.js
+      - /app/node_modules
+    command: npm run dev
+    restart: unless-stopped
