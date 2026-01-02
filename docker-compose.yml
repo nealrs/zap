@@ -8,6 +8,7 @@ services:
       - ENV=production
       - PORT=3000
     restart: unless-stopped
+    command: npm start
     networks:
      - proxy-network
 
