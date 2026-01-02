@@ -1,18 +1,20 @@
 
 services:
-  app:
+  zap-prod:
     build: .
     ports:
-      - "3000:3000"
+      - "1337:3000"
     environment:
       - ENV=production
       - PORT=3000
     restart: unless-stopped
+    networks:
+     - proxy-network
 
-  dev:
+  zap-dev:
     build: .
     ports:
-      - "1337:3000"
+      - "1338:3000"
     environment:
       - ENV=dev
       - PORT=3000
@@ -22,3 +24,9 @@ services:
       - /app/node_modules
     command: npm run dev
     restart: unless-stopped
+    networks:
+     - proxy-network
+
+networks:
+  proxy-network:
+    external: true
