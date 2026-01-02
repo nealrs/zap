@@ -158,13 +158,6 @@ function showLevelSelector() {
     
     selectorHTML += '</div>';
     
-    // Add credits
-    selectorHTML += '<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6;">';
-    selectorHTML += 'Created by <a href="https://nealshyam.com" target="_blank" rel="noopener" style="color: #a78bfa; text-decoration: none;">Neal Shyam</a> ';
-    selectorHTML += '(<a href="https://github.com/nealrs" target="_blank" rel="noopener" style="color: #a78bfa; text-decoration: none;">@nealrs</a>)<br>';
-    selectorHTML += '© 2026 Neal Shyam. All rights reserved.';
-    selectorHTML += '</div>';
-    
     selectorHTML += '</div>';
     
     document.getElementById('level-desc').innerHTML = selectorHTML;
