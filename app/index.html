@@ -17,7 +17,7 @@
     <!-- Apple Touch Icon -->
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
     
-    <title>Bubble Zap 3D</title>
+    <title>BubbleZap 3D</title>
     <style>
         body { 
             margin: 0; 
@@ -379,7 +379,7 @@
         }
 
         .loading-logo {
-            font-size: clamp(40px, 12vw, 80px);
+            font-size: clamp(32px, 10vw, 60px);
             font-weight: 900;
             background: linear-gradient(135deg, 
                 #a78bfa, #60a5fa, #34d399, #fbbf24);
@@ -412,14 +412,11 @@
         }
 
         .loading-credits {
-            position: absolute;
-            bottom: 30px;
-            left: 0;
-            right: 0;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
             font-size: 14px;
             line-height: 1.6;
+            margin-bottom: 40px;
         }
 
         .loading-credits a {
@@ -429,6 +426,16 @@
 
         .loading-credits a:hover {
             color: #c4b5fd;
+        }
+
+        .loading-copyright {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
         }
 
         @keyframes spin {
@@ -445,11 +452,13 @@
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen">
-        <div class="loading-logo">BUBBLE ZAP</div>
+        <div class="loading-logo">BubbleZap 3D</div>
+        <div class="loading-credits">
+            Created by <a href="https://twitter.com/nealrs" target="_blank" rel="noopener">@nealrs</a>
+        </div>
         <div class="loading-spinner"></div>
         <div class="loading-text">LOADING</div>
-        <div class="loading-credits">
-            Created by <a href="https://twitter.com/nealrs" target="_blank" rel="noopener">@nealrs</a><br>
+        <div class="loading-copyright">
             © 2026 Neal Shyam. All rights reserved.
         </div>
     </div>
@@ -470,7 +479,7 @@
 
     <div id="overlay">
         <div class="panel">
-            <h1 id="main-title">BUBBLE ZAP</h1>
+            <h1 id="main-title">BUBBLEZAP 3D</h1>
             <h2 id="sub-title">Loading...</h2>
             <p id="level-desc">Prepare for the void.</p>
             <button id="start-btn">START</button>
