@@ -111,7 +111,14 @@ function generateSoundtrack(audioCtx, levelIndex) {
             const newNow = audioCtx.currentTime;
             const masterGain = audioCtx.createGain();
             masterGain.gain.value = 0.15;
-            masterGain.connect(audioCtx.destination);
+            
+            // Connect to compressor if available, otherwise destination
+            if (audioCtx.compressor) {
+                masterGain.connect(audioCtx.compressor);
+            } else {
+                masterGain.connect(audioCtx.destination);
+            }
+            
             soundtrackNodes.push(masterGain);
             
             const newThemeNodes = themes[themeIndex]();
