@@ -63,6 +63,87 @@ function createBubbleTexture() {
     return texture;
 }
 
+/**
+ * Hide the loading screen with fade out animation
+ */
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        // Remove from DOM after transition completes
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 600);
+    }
+}
+
+/**
+ * Get the highest level the player has unlocked (0-indexed)
+ * Returns 0 for new players (can play level 1)
+ */
+function getUnlockedLevel() {
+    const unlocked = localStorage.getItem('maxUnlockedLevel');
+    return unlocked ? parseInt(unlocked) : 0;
+}
+
+/**
+ * Update the max unlocked level (when player completes a level)
+ */
+function unlockNextLevel(completedLevel) {
+    const currentMax = getUnlockedLevel();
+    const newMax = Math.max(currentMax, completedLevel + 1);
+    localStorage.setItem('maxUnlockedLevel', newMax);
+}
+
+/**
+ * Show the level selector screen
+ */
+function showLevelSelector() {
+    const maxUnlocked = getUnlockedLevel();
+    
+    document.getElementById('overlay').classList.remove('hidden');
+    document.getElementById('overlay').classList.remove('victory-finale');
+    document.getElementById('main-title').innerText = "SELECT LEVEL";
+    document.getElementById('sub-title').innerText = "";
+    
+    // Build level selector grid
+    let selectorHTML = '<div style="padding: 10px;">';
+    selectorHTML += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 600px; margin: 0 auto;">';
+    
+    levels.forEach((lvl, idx) => {
+        const isUnlocked = idx <= maxUnlocked;
+        const btnStyle = isUnlocked 
+            ? 'background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #fff; cursor: pointer;'
+            : 'background: #333; color: #666; cursor: not-allowed;';
+        
+        selectorHTML += `
+            <button 
+                style="${btnStyle} border: 2px solid rgba(255,255,255,0.3); padding: 20px 10px; font-size: 16px; font-weight: 600; border-radius: 8px; transition: all 0.2s;"
+                ${isUnlocked ? `onclick="startLevelFromSelector(${idx})"` : 'disabled'}
+                ${isUnlocked ? `onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.3)';"` : ''}
+                ${isUnlocked ? `onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"` : ''}
+            >
+                ${isUnlocked ? '🔓' : '🔒'}<br>
+                Level ${idx + 1}<br>
+                <small style="font-size: 12px; opacity: 0.8;">${lvl.name}</small>
+            </button>
+        `;
+    });
+    
+    selectorHTML += '</div></div>';
+    
+    document.getElementById('level-desc').innerHTML = selectorHTML;
+    
+    const btn = document.getElementById('start-btn');
+    btn.style.display = 'none'; // Hide the main button
+}
+
+/**
+ * Start a level from the selector
+ */
+function startLevelFromSelector(idx) {
+    showLevelIntro(idx);
+}
 
 /**
  * Load game configuration
@@ -416,6 +497,9 @@ function loadLevels() {
             const urlParams = new URLSearchParams(window.location.search);
             const devFinale = urlParams.has('devFinale');
             
+            // Hide loading screen
+            hideLoadingScreen();
+            
             if (devFinale) {
                 // Show finale screen directly
                 animate();
@@ -432,14 +516,15 @@ function loadLevels() {
                 animate();
                 showLevelIntro(devLevel);
             } else {
-                // Normal mode - start from level 0
+                // Normal mode - show level selector
                 isDevMode = false;
                 animate();
-                showLevelIntro(0);
+                showLevelSelector();
             }
         })
         .catch(err => {
             console.error('Failed to load levels:', err);
+            hideLoadingScreen();
             showErrorOverlay('Could not load levels.json.\n' + err.message);
         });
 }
@@ -476,6 +561,12 @@ function showLevelIntro(idx) {
     isRunning = false; 
     if (timer) clearInterval(timer);
     
+    // Clean up any selector button from previous screen
+    const oldSelectorBtn = document.getElementById('selector-btn');
+    if (oldSelectorBtn) {
+        oldSelectorBtn.remove();
+    }
+    
     currentIdx = idx;
     const lvl = levels[idx];
     
@@ -485,6 +576,7 @@ function showLevelIntro(idx) {
     document.getElementById('level-desc').innerText = lvl.desc;
     
     const btn = document.getElementById('start-btn');
+    btn.style.display = ''; // Make button visible again
     btn.innerText = "START LEVEL";
     btn.onclick = () => {
         // Wake up audio context on user interaction
@@ -499,6 +591,42 @@ function showLevelIntro(idx) {
         // Start the level
         startLevel(idx);
     };
+    
+    // Add "Back to Level Selector" option for normal mode
+    if (!isDevMode) {
+        const selectorBtn = document.createElement('button');
+        selectorBtn.id = 'selector-btn';
+        selectorBtn.innerText = "All Levels";
+        selectorBtn.style.marginTop = '10px';
+        selectorBtn.style.fontSize = '14px';
+        selectorBtn.style.padding = '8px 16px';
+        selectorBtn.style.background = 'rgba(255,255,255,0.1)';
+        selectorBtn.style.border = '1px solid rgba(255,255,255,0.3)';
+        selectorBtn.style.color = 'rgba(255,255,255,0.7)';
+        selectorBtn.onclick = () => {
+            // Remove the temporary button
+            if (document.getElementById('selector-btn')) {
+                document.getElementById('selector-btn').remove();
+            }
+            showLevelSelector();
+        };
+        btn.parentNode.insertBefore(selectorBtn, btn.nextSibling);
+    } else {
+        // Dev mode: add back to dev menu button
+        const devMenuBtn = document.createElement('button');
+        devMenuBtn.id = 'selector-btn';
+        devMenuBtn.innerText = "← Dev Menu";
+        devMenuBtn.style.marginTop = '10px';
+        devMenuBtn.style.fontSize = '14px';
+        devMenuBtn.style.padding = '8px 16px';
+        devMenuBtn.style.background = 'rgba(255,107,107,0.2)';
+        devMenuBtn.style.border = '1px solid rgba(255,107,107,0.5)';
+        devMenuBtn.style.color = 'rgba(255,107,107,0.9)';
+        devMenuBtn.onclick = () => {
+            window.location.href = '/dev';
+        };
+        btn.parentNode.insertBefore(devMenuBtn, btn.nextSibling);
+    }
 }
 
 /**
@@ -707,6 +835,26 @@ function endGame(win) {
             showLevelIntro(0);
         };
         
+        // Add "Back to Level Selector" option
+        const selectorBtn = document.createElement('button');
+        selectorBtn.id = 'selector-btn';
+        selectorBtn.innerText = "All Levels";
+        selectorBtn.style.marginTop = '10px';
+        selectorBtn.style.fontSize = '14px';
+        selectorBtn.style.padding = '8px 16px';
+        selectorBtn.style.background = 'rgba(255,255,255,0.1)';
+        selectorBtn.style.border = '1px solid rgba(255,255,255,0.3)';
+        selectorBtn.style.color = 'rgba(255,255,255,0.7)';
+        selectorBtn.onclick = () => {
+            // Remove the temporary button and victory animation
+            if (document.getElementById('selector-btn')) {
+                document.getElementById('selector-btn').remove();
+            }
+            document.getElementById('overlay').classList.remove('victory-finale');
+            showLevelSelector();
+        };
+        btn.parentNode.insertBefore(selectorBtn, btn.nextSibling);
+        
         // Add victory animation class
         document.getElementById('overlay').classList.add('victory-finale');
         
@@ -739,6 +887,11 @@ function endGame(win) {
         return;
     }
     
+    // Unlock next level on victory
+    if (win) {
+        unlockNextLevel(currentIdx);
+    }
+    
     document.getElementById('main-title').innerText = win ? "VICTORY" : "FAILED";
     document.getElementById('sub-title').innerText = win ? "Level Complete" : "Time Ran Out";
     
@@ -763,14 +916,52 @@ function endGame(win) {
         document.getElementById('main-title').innerText = "READY?";
         document.getElementById('sub-title').innerText = `Level ${nextIdx + 1}`;
         document.getElementById('level-desc').innerText = combinedDesc;
-        btn.innerText = "BEGIN NEXT LEVEL";
+        btn.innerText = "NEXT LEVEL";
         btn.onclick = () => {
             currentIdx = nextIdx;
             startLevel(nextIdx);
         };
+        
+        // Add "Back to Level Selector" option
+        const selectorBtn = document.createElement('button');
+        selectorBtn.id = 'selector-btn';
+        selectorBtn.innerText = "All Levels";
+        selectorBtn.style.marginTop = '10px';
+        selectorBtn.style.fontSize = '14px';
+        selectorBtn.style.padding = '8px 16px';
+        selectorBtn.style.background = 'rgba(255,255,255,0.1)';
+        selectorBtn.style.border = '1px solid rgba(255,255,255,0.3)';
+        selectorBtn.style.color = 'rgba(255,255,255,0.7)';
+        selectorBtn.onclick = () => {
+            // Remove the temporary button
+            if (document.getElementById('selector-btn')) {
+                document.getElementById('selector-btn').remove();
+            }
+            showLevelSelector();
+        };
+        btn.parentNode.insertBefore(selectorBtn, btn.nextSibling);
     } else {
         btn.innerText = "RETRY LEVEL";
         btn.onclick = () => showLevelIntro(currentIdx);
+        
+        // Also add selector option on failure
+        const selectorBtn = document.createElement('button');
+        selectorBtn.id = 'selector-btn';
+        selectorBtn.innerText = "All Levels";
+        selectorBtn.style.marginTop = '10px';
+        selectorBtn.style.fontSize = '14px';
+        selectorBtn.style.padding = '8px 16px';
+        selectorBtn.style.background = 'rgba(255,255,255,0.1)';
+        selectorBtn.style.border = '1px solid rgba(255,255,255,0.3)';
+        selectorBtn.style.color = 'rgba(255,255,255,0.7)';
+        selectorBtn.onclick = () => {
+            // Remove the temporary button
+            if (document.getElementById('selector-btn')) {
+                document.getElementById('selector-btn').remove();
+            }
+            showLevelSelector();
+        };
+        btn.parentNode.insertBefore(selectorBtn, btn.nextSibling);
     }
 }
 
