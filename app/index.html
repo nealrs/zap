@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0575e6">
-    <link rel="manifest" href="assets/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/assets/manifest.json">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    
     <title>Bubble Zap 3D</title>
     <style>
         body { 
@@ -12,12 +24,19 @@
             overflow: hidden; 
             background-color: #000; 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
-            touch-action: none; 
+            touch-action: none;
         }
         canvas { 
             display: block; 
             width: 100vw; 
-            height: 100vh; 
+            height: 100vh;
+        }
+        
+        /* Crosshair cursor for desktop/mouse users */
+        @media (hover: hover) and (pointer: fine) {
+            body, canvas {
+                cursor: crosshair;
+            }
         }
         
         #ui-layer {
@@ -119,9 +138,225 @@
         #overlay.hidden button {
             pointer-events: none;
         }
+
+        /* Victory finale screen - colorful celebration */
+        #overlay.victory-finale {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 191, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 215, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at center, #0a0a1e 0%, #000000 100%) !important;
+            animation: colorShift 10s ease-in-out infinite !important;
+            overflow: hidden;
+        }
+
+        #overlay.victory-finale::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.03) 2px, rgba(255, 255, 255, 0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.03) 2px, rgba(255, 255, 255, 0.03) 4px);
+            animation: scanlines 20s linear infinite;
+            pointer-events: none;
+        }
+
+        #overlay.victory-finale::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(138, 43, 226, 0.25) 0%, transparent 25%),
+                radial-gradient(circle at 70% 50%, rgba(0, 191, 255, 0.25) 0%, transparent 25%),
+                radial-gradient(circle at 50% 30%, rgba(255, 215, 0, 0.2) 0%, transparent 25%);
+            animation: backgroundPulse 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #overlay.victory-finale .panel {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            max-width: 95%;
+        }
+
+        #overlay.victory-finale h1 {
+            font-size: clamp(28px, 8vw, 90px);
+            background: linear-gradient(135deg, 
+                #a78bfa, #60a5fa, #34d399, #fbbf24, #fb923c) !important;
+            background-size: 200% 100% !important;
+            animation: rainbowSlide 4s linear infinite, float 3s ease-in-out infinite !important;
+            background-clip: text !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            filter: drop-shadow(0 0 20px rgba(168, 139, 250, 0.6))
+                    drop-shadow(0 0 40px rgba(96, 165, 250, 0.4)) !important;
+            letter-spacing: 0.05em;
+            margin: 10px 0;
+            line-height: 1;
+            word-spacing: 0.1em;
+        }
+
+        #overlay.victory-finale h2 {
+            color: #fff !important;
+            font-size: clamp(16px, 4vw, 36px);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            background: linear-gradient(90deg, #60a5fa, #34d399, #fbbf24) !important;
+            background-clip: text !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            animation: textGlow 2s ease-in-out infinite alternate !important;
+            margin: 12px 0;
+            filter: drop-shadow(0 0 15px rgba(96, 165, 250, 0.5)) !important;
+            line-height: 1.2;
+        }
+
+        #overlay.victory-finale p {
+            color: #e0e0e0 !important;
+            font-size: clamp(14px, 3.2vw, 24px);
+            font-weight: 500;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            text-shadow: 
+                0 0 8px rgba(168, 139, 250, 0.4),
+                0 0 15px rgba(96, 165, 250, 0.3) !important;
+            animation: textPulse 2s ease-in-out infinite !important;
+            margin: 18px 0;
+        }
+
+        #overlay.victory-finale button {
+            background: linear-gradient(135deg, 
+                #a78bfa, #60a5fa, #34d399, #fbbf24) !important;
+            background-size: 200% 200% !important;
+            animation: gradientShift 5s ease infinite !important;
+            color: #000 !important;
+            font-size: clamp(16px, 3.5vw, 22px);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 
+                0 0 20px rgba(168, 139, 250, 0.6),
+                0 0 40px rgba(96, 165, 250, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.2) !important;
+            border: 2px solid rgba(255, 255, 255, 0.6) !important;
+            border-radius: 50px !important;
+            padding: 14px 28px !important;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #overlay.victory-finale button:hover {
+            transform: scale(1.08);
+            box-shadow: 
+                0 0 30px rgba(168, 139, 250, 0.8),
+                0 0 60px rgba(96, 165, 250, 0.6),
+                inset 0 0 25px rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+
+        @keyframes colorShift {
+            0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+            50% { filter: hue-rotate(30deg) brightness(1.05); }
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(-5%, -5%) scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes rainbowSlide {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes textGlow {
+            from { 
+                filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5)) brightness(1);
+            }
+            to { 
+                filter: drop-shadow(0 0 20px rgba(52, 211, 153, 0.6)) brightness(1.1);
+            }
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
+        /* Landscape orientation warning */
+        #orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (orientation: landscape) and (max-width: 900px) {
+            #orientation-warning {
+                display: flex;
+            }
+        }
+
+        .rotate-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
     </style>
 </head>
 <body>
+    <!-- Orientation Warning -->
+    <div id="orientation-warning">
+        <div class="rotate-icon">📱</div>
+        <div>Please rotate your device to portrait mode</div>
+    </div>
+
     <div id="ui-layer">
         <div class="hud-top">
             <div>LVL: <span id="level-el" style="color:#ffeb3b">1</span></div>
@@ -144,23 +379,53 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <!-- Special Bubbles Config -->
-    <script src="js/specialbubbles.js"></script>
+    <script src="/js/specialbubbles.js"></script>
 
     <!-- Hazard Module -->
-    <script src="js/hazards.js"></script>
+    <script src="/js/hazards.js"></script>
 
     <!-- Game Logic -->
-    <script src="js/game.js"></script>
+    <script src="/js/game.js"></script>
 
     <!-- Service Worker Registration for PWA -->
     <script>
+        // Lock screen orientation to portrait on mobile devices
+        async function lockOrientation() {
+            try {
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('portrait-primary');
+                    console.log('Screen orientation locked to portrait');
+                }
+            } catch (err) {
+                console.log('Screen orientation lock not supported or failed:', err);
+            }
+        }
+
+        // Try to lock orientation when the page loads
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            lockOrientation();
+        }
+
+        // Lock orientation when entering fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                lockOrientation();
+            }
+        });
+
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (document.webkitFullscreenElement) {
+                lockOrientation();
+            }
+        });
+
         // Conditionally register service worker based on environment
         if ('serviceWorker' in navigator) {
             fetch('/api/env')
                 .then(res => res.json())
                 .then(data => {
                     if (data.env !== 'dev') {
-                        navigator.serviceWorker.register('./js/sw.js').catch(err => {
+                        navigator.serviceWorker.register('/js/sw.js').catch(err => {
                             console.log('Service Worker registration failed:', err);
                         });
                     } else {

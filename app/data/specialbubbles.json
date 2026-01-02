@@ -4,6 +4,7 @@
       "description": "Adds extra seconds to the clock",
       "color": "0xff00ff",
       "icon": "⏱",
+      "lifetime": 5,
       "effect": {
         "type": "timebonus",
         "amount": 5,
@@ -20,6 +21,7 @@
       "description": "Awards extra points toward the target",
       "color": "0xffd700",
       "icon": "⭐",
+      "lifetime": 5,
       "effect": {
         "type": "pointsbonus",
         "amount": 3,
@@ -36,6 +38,7 @@
       "description": "Pop bubbles near it automatically",
       "color": "0x00aaff",
       "icon": "💥",
+      "lifetime": 5,
       "effect": {
         "type": "multipop",
         "radius": 8,
@@ -54,6 +57,7 @@
       "description": "Slows down bubble physics temporarily",
       "color": "0x00ff00",
       "icon": "🐢",
+      "lifetime": 5,
       "effect": {
         "type": "slowmo",
         "durationSeconds": 8,
@@ -71,6 +75,7 @@
       "description": "Protect one bubble from being affected by hazards",
       "color": "0x4169e1",
       "icon": "🛡",
+      "lifetime": 5,
       "effect": {
         "type": "shield",
         "bubbleCount": 1,
@@ -88,6 +93,7 @@
       "description": "Bubbles drift toward your cursor",
       "color": "0xff6600",
       "icon": "🧲",
+      "lifetime": 5,
       "effect": {
         "type": "magnetize",
         "durationSeconds": 6,

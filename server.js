@@ -12,6 +12,31 @@ const ENV = process.env.ENV || 'production';
 // Serve static files from app directory
 app.use(express.static(join(__dirname, 'app')));
 
+// Dev mode level selector (only in dev environment)
+app.get('/dev', (req, res) => {
+    if (ENV !== 'dev') {
+        return res.status(404).send('Not found');
+    }
+    res.sendFile(join(__dirname, 'app', 'dev.html'));
+});
+
+// Dev mode finale screen testing
+app.get('/dev/finale', (req, res) => {
+    if (ENV !== 'dev') {
+        return res.status(404).send('Not found');
+    }
+    res.redirect('/?devFinale=true');
+});
+
+// Dev mode direct level access (e.g., /dev/8 for level 8)
+app.get('/dev/:level', (req, res) => {
+    if (ENV !== 'dev') {
+        return res.status(404).send('Not found');
+    }
+    // Redirect to dev selector with level parameter
+    res.redirect(`/dev?level=${req.params.level}`);
+});
+
 // Inject environment variable into HTML
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'app', 'index.html'));

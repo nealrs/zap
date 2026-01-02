@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "ENV=dev node --watch server.js"
+    "dev": "ENV=dev node --watch server.js",
+    "generate-icons": "./generate-icons.sh"
   },
   "dependencies": {
     "express": "^4.18.2"

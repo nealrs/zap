@@ -26,6 +26,7 @@ let specialBubbleSpawnTimer = 0;
 let slowmoTimer = 0;
 let gameConfig = null;
 let bubbleNormalMap = null; // Procedural texture for bubbles
+let isDevMode = false; // Flag for dev mode testing
 
 
 /**
@@ -385,8 +386,8 @@ function initScene() {
     }));
     scene.add(refDots);
 
-    // Load levels and start the game
-    //loadLevels();
+    // Load levels and start the game (called via callback chain from window.load)
+    // loadLevels();
 }
 
 /**
@@ -406,14 +407,64 @@ function loadLevels() {
                     lvl.color = parseInt(lvl.color, 16);
                 }
             });
-            // High score tracking removed
-            animate();
-            showLevelIntro(0);
+            
+            // Check for dev mode
+            const devMode = localStorage.getItem('devMode') === 'true';
+            const devLevel = parseInt(localStorage.getItem('devLevel') || '0');
+            
+            // Check for dev finale test
+            const urlParams = new URLSearchParams(window.location.search);
+            const devFinale = urlParams.has('devFinale');
+            
+            if (devFinale) {
+                // Show finale screen directly
+                animate();
+                currentIdx = levels.length - 1;
+                score = 45; // Sample final score
+                showDevFinale();
+            } else if (devMode) {
+                // Clear dev mode flags and set global flag
+                localStorage.removeItem('devMode');
+                localStorage.removeItem('devLevel');
+                isDevMode = true;
+                
+                // Start the specified level
+                animate();
+                showLevelIntro(devLevel);
+            } else {
+                // Normal mode - start from level 0
+                isDevMode = false;
+                animate();
+                showLevelIntro(0);
+            }
         })
         .catch(err => {
             console.error('Failed to load levels:', err);
             showErrorOverlay('Could not load levels.json.\n' + err.message);
         });
+}
+
+/**
+ * Show dev finale screen for testing
+ */
+function showDevFinale() {
+    document.getElementById('overlay').classList.remove('hidden');
+    document.getElementById('overlay').classList.add('victory-finale');
+    
+    document.getElementById('main-title').innerText = "🎉 CHAMPION 🎉";
+    document.getElementById('sub-title').innerText = "GAME COMPLETE";
+    
+    let victoryMessage = `${levels.length} LEVELS CONQUERED\n\n`;
+    victoryMessage += `✨ BUBBLE ZAP MASTER ✨\n\n`;
+    victoryMessage += `(Dev Mode Test)`;
+    
+    document.getElementById('level-desc').innerText = victoryMessage;
+    
+    const btn = document.getElementById('start-btn');
+    btn.innerText = "← BACK TO DEV MENU";
+    btn.onclick = () => {
+        window.location.href = '/dev';
+    };
 }
 
 /**
@@ -561,14 +612,29 @@ function spawnSpecialBubble(lvl) {
         color: parseInt(def.color),
         emissive: def.visual?.glowColor || parseInt(def.color),
         emissiveIntensity: def.visual?.glowIntensity || 0.7,
-        transmission: 0.5,
-        roughness: 0.1,
+        transmission: 0.3,
+        roughness: 0.05,
+        metalness: 0.3,
         transparent: true,
-        opacity: 1.0,
+        opacity: 0.95,
         normalMap: bubbleNormalMap,
-        normalScale: new THREE.Vector2(0.4, 0.4)
+        normalScale: new THREE.Vector2(0.8, 0.8),
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1
     });
     const b = new THREE.Mesh(geo, mat);
+    
+    // Add glowing ring around special bubbles for extra distinction
+    const ringGeo = new THREE.TorusGeometry(lvl.size * (def.visual?.scale || 1.2) * 1.1, 0.05, 8, 16);
+    const ringMat = new THREE.MeshBasicMaterial({
+        color: def.visual?.glowColor || parseInt(def.color),
+        transparent: true,
+        opacity: 0.6
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    b.add(ring);
+    b.userData.ring = ring;
     
     // Use same safe spawn area as regular bubbles
     const spawnRadius = 7;
@@ -587,6 +653,8 @@ function spawnSpecialBubble(lvl) {
     b.userData.special = true;
     b.userData.specialType = type;
     b.userData.wormholeImmunity = 0;
+    b.userData.spawnTime = performance.now();
+    b.userData.lifetime = (def.lifetime || 5) * 1000; // Convert seconds to milliseconds
     scene.add(b);
     specialBubbles.push(b);
 }
@@ -620,24 +688,15 @@ function endGame(win) {
     document.getElementById('overlay').classList.remove('hidden');
     
     // Check if this is the final level victory
-    const isFinalVictory = win && currentIdx === levels.length - 1;
+    const isFinalVictory = win && currentIdx === levels.length - 1 && !isDevMode;
     
     if (isFinalVictory) {
-        // EPIC FINAL VICTORY SCREEN - Arcade Style
-        document.getElementById('main-title').innerText = "★ CHAMPION ★";
-        document.getElementById('sub-title').innerText = "ALL LEVELS CONQUERED";
+        // EPIC FINAL VICTORY SCREEN - Colorful Celebration
+        document.getElementById('main-title').innerText = "🎉 CHAMPION 🎉";
+        document.getElementById('sub-title').innerText = "GAME COMPLETE";
         
-        let victoryMessage = `╔═══════════════════════════╗\n`;
-        victoryMessage += `║  CONGRATULATIONS PILOT!   ║\n`;
-        victoryMessage += `╚═══════════════════════════╝\n\n`;
-        victoryMessage += `You've mastered all hazards:\n`;
-        victoryMessage += `✓ Comets    ✓ Wormholes\n`;
-        victoryMessage += `✓ Repulsors ✓ Bumpers\n\n`;
-        victoryMessage += `Total Levels Completed: ${levels.length}\n`;
-        victoryMessage += `Final Score: ${score} pops\n\n`;
-        victoryMessage += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        victoryMessage += `You are a true\n`;
-        victoryMessage += `BUBBLE ZAP MASTER!`;
+        let victoryMessage = `${levels.length} LEVELS CONQUERED\n\n`;
+        victoryMessage += `✨ BUBBLE ZAP MASTER ✨`;
         
         document.getElementById('level-desc').innerText = victoryMessage;
         
@@ -657,13 +716,36 @@ function endGame(win) {
     // Remove victory class if present
     document.getElementById('overlay').classList.remove('victory-finale');
     
+    // DEV MODE: Show different options
+    if (isDevMode) {
+        document.getElementById('main-title').innerText = win ? "✓ PASSED" : "✗ FAILED";
+        document.getElementById('sub-title').innerText = `Level ${currentIdx + 1} - ${levels[currentIdx].name}`;
+        
+        let devDesc = win 
+            ? `✓ Level complete!\n` 
+            : `✗ Time ran out\n`;
+        devDesc += `Time: ${win ? levels[currentIdx].time - timeLeft : levels[currentIdx].time}s\n\n`;
+        devDesc += `━━━━━━━━━━━━━━━━━━\n\n`;
+        devDesc += `Dev Mode Active`;
+        
+        document.getElementById('level-desc').innerText = devDesc;
+        
+        const btn = document.getElementById('start-btn');
+        btn.innerText = "← BACK TO DEV MENU";
+        btn.onclick = () => {
+            window.location.href = '/dev';
+        };
+        
+        return;
+    }
+    
     document.getElementById('main-title').innerText = win ? "VICTORY" : "FAILED";
     document.getElementById('sub-title').innerText = win ? "Level Complete" : "Time Ran Out";
     
-    // Build description with score
+    // Build description
     let description = win 
-        ? `Successfully popped ${score} bubbles.` 
-        : `You popped ${score} bubbles. Goal was ${levels[currentIdx].target}.`;
+        ? `Level complete!` 
+        : `Time ran out. Try again!`;
     
     document.getElementById('level-desc').innerText = description;
     
@@ -741,6 +823,11 @@ function handleInteraction(x, y) {
         // Play pop sound and effect
         playPopSound();
         createParticleBurst(b.position, def ? parseInt(def.color) : 0xffffff);
+        
+        // All special bubble clicks count toward score
+        score++;
+        document.getElementById('score-el').innerText = score;
+        
         // Apply effect
         if (type === 'timebonus') {
             timeLeft += def.effect.amount;
@@ -762,6 +849,12 @@ function handleInteraction(x, y) {
             slowmoTimer = def.effect.durationSeconds;
         }
         // ...add more effects as needed...
+        
+        // Check for level completion after special bubble effects
+        if(score >= levels[currentIdx].target) {
+            endGame(true);
+        }
+        
         return;
     }
     // Now raycast for regular bubbles
@@ -927,6 +1020,15 @@ function animate() {
     // Update special bubbles
     for (let i = specialBubbles.length - 1; i >= 0; i--) {
         const b = specialBubbles[i];
+        
+        // Check lifetime and remove if expired
+        const age = performance.now() - b.userData.spawnTime;
+        if (age > b.userData.lifetime) {
+            scene.remove(b);
+            specialBubbles.splice(i, 1);
+            continue;
+        }
+        
         // Animate visuals (pulse)
         const def = specialBubbleTypes[b.userData.specialType];
         if (def && def.visual && b.material) {
