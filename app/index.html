@@ -411,6 +411,26 @@
             animation: pulse 1.5s ease-in-out infinite;
         }
 
+        .loading-credits {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .loading-credits a {
+            color: #a78bfa;
+            text-decoration: none;
+        }
+
+        .loading-credits a:hover {
+            color: #c4b5fd;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -428,6 +448,10 @@
         <div class="loading-logo">BUBBLE ZAP</div>
         <div class="loading-spinner"></div>
         <div class="loading-text">LOADING</div>
+        <div class="loading-credits">
+            Created by <a href="https://twitter.com/nealrs" target="_blank" rel="noopener">@nealrs</a><br>
+            © 2026 Neal Shyam. All rights reserved.
+        </div>
     </div>
 
     <!-- Orientation Warning -->

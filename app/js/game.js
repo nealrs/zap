@@ -27,6 +27,7 @@ let slowmoTimer = 0;
 let gameConfig = null;
 let bubbleNormalMap = null; // Procedural texture for bubbles
 let isDevMode = false; // Flag for dev mode testing
+let loadingStartTime = Date.now(); // Track when loading started
 
 
 /**
@@ -65,15 +66,31 @@ function createBubbleTexture() {
 
 /**
  * Hide the loading screen with fade out animation
+ * Ensures minimum 5 second display time on first visit per day
  */
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
-        loadingScreen.classList.add('hidden');
-        // Remove from DOM after transition completes
+        const today = new Date().toDateString();
+        const lastShown = localStorage.getItem('lastLoadingScreenDate');
+        const isFirstVisitToday = lastShown !== today;
+        
+        const elapsedTime = Date.now() - loadingStartTime;
+        const minLoadingTime = isFirstVisitToday ? 5000 : 0; // 5 seconds only on first visit per day
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        // Mark that we've shown the loading screen today
+        if (isFirstVisitToday) {
+            localStorage.setItem('lastLoadingScreenDate', today);
+        }
+        
         setTimeout(() => {
-            loadingScreen.style.display = 'none';
-        }, 600);
+            loadingScreen.classList.add('hidden');
+            // Remove from DOM after transition completes
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 600);
+        }, remainingTime);
     }
 }
 
@@ -130,7 +147,16 @@ function showLevelSelector() {
         `;
     });
     
-    selectorHTML += '</div></div>';
+    selectorHTML += '</div>';
+    
+    // Add credits
+    selectorHTML += '<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.6;">';
+    selectorHTML += 'Created by <a href="https://nealshyam.com" target="_blank" rel="noopener" style="color: #a78bfa; text-decoration: none;">Neal Shyam</a> ';
+    selectorHTML += '(<a href="https://github.com/nealrs" target="_blank" rel="noopener" style="color: #a78bfa; text-decoration: none;">@nealrs</a>)<br>';
+    selectorHTML += '© 2026 Neal Shyam. All rights reserved.';
+    selectorHTML += '</div>';
+    
+    selectorHTML += '</div>';
     
     document.getElementById('level-desc').innerHTML = selectorHTML;
     
@@ -541,7 +567,10 @@ function showDevFinale() {
     
     let victoryMessage = `${levels.length} LEVELS CONQUERED\n\n`;
     victoryMessage += `✨ BUBBLE ZAP MASTER ✨\n\n`;
-    victoryMessage += `(Dev Mode Test)`;
+    victoryMessage += `(Dev Mode Test)\n\n`;
+    victoryMessage += `━━━━━━━━━━━━━━━━━━\n\n`;
+    victoryMessage += `Created by Neal Shyam (@nealrs)\n`;
+    victoryMessage += `© 2026 Neal Shyam. All rights reserved.`;
     
     document.getElementById('level-desc').innerText = victoryMessage;
     
@@ -824,7 +853,10 @@ function endGame(win) {
         document.getElementById('sub-title').innerText = "GAME COMPLETE";
         
         let victoryMessage = `${levels.length} LEVELS CONQUERED\n\n`;
-        victoryMessage += `✨ BUBBLE ZAP MASTER ✨`;
+        victoryMessage += `✨ BUBBLE ZAP MASTER ✨\n\n`;
+        victoryMessage += `━━━━━━━━━━━━━━━━━━\n\n`;
+        victoryMessage += `Created by Neal Shyam (@nealrs)\n`;
+        victoryMessage += `© 2026 Neal Shyam. All rights reserved.`;
         
         document.getElementById('level-desc').innerText = victoryMessage;
         
