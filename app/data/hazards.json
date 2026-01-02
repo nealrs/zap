@@ -21,15 +21,26 @@
         "forceMultiplier": 1.8
       }
     },
-    "bumper": {
-      "description": "Bounces bubbles with increased velocity",
-      "geometry": "dodecahedron",
-      "color": 16776960,
-      "emissive": 8355840,
+    "pulsar": {
+      "description": "Alters field rotation speed and direction erratically",
+      "geometry": "sphere",
+      "color": 16711935,
+      "emissive": 8913151,
       "physics": {
-        "attractive": false,
-        "bounceForceMultiplier": 2.2,
-        "bounceVelocityMultiplier": 1.5
+        "changeInterval": 3000,
+        "minInterval": 2500,
+        "maxInterval": 6000
+      }
+    },
+    "asteroidbelt": {
+      "description": "Unpoppable boulders that deflect bubbles",
+      "geometry": "dodecahedron",
+      "color": 6710886,
+      "emissive": 3355443,
+      "physics": {
+        "boulderCount": 12,
+        "deflectionForce": 0.15,
+        "rotationSpeed": 0.005
       }
     },
     "comet": {
@@ -56,10 +67,18 @@
       "s": 0.05,
       "rotationSpeed": 0.02
     },
-    "bumper": {
+    "pulsar": {
       "r": 6,
-      "s": 0.06,
-      "rotationSpeed": 0.04
+      "s": 0.04,
+      "changeInterval": 4000,
+      "minInterval": 3000,
+      "maxInterval": 7000
+    },
+    "asteroidbelt": {
+      "r": 8,
+      "s": 0.03,
+      "boulderCount": 15,
+      "rotationSpeed": 0.003
     },
     "comet": {
       "r": 12,

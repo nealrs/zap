@@ -30,17 +30,145 @@ function createHazard(hData, scene) {
         });
         mesh = new THREE.Mesh(geo, mat);
         mesh.userData.pulse = true;
-    } else if (hData.type === 'bumper') {
-        geo = new THREE.IcosahedronGeometry(hData.r * 0.3, 1);
-        mat = new THREE.MeshPhongMaterial({color: 0xffaa00, wireframe: true});
+    } else if (hData.type === 'pulsar') {
+        // Pulsar: pulsing energy sphere with radiating rings
+        geo = new THREE.SphereGeometry(hData.r * 0.4, 32, 32);
+        mat = new THREE.MeshPhysicalMaterial({
+            color: 0xff00ff,
+            emissive: 0xff00ff,
+            emissiveIntensity: 1.2,
+            transparent: true,
+            opacity: 0.8,
+            roughness: 0.1,
+            transmission: 0.3
+        });
         mesh = new THREE.Mesh(geo, mat);
-        // Add a spinning ring for visual clarity
-        const ringGeo = new THREE.TorusGeometry(hData.r * 0.32, 0.08, 16, 32);
-        const ringMat = new THREE.MeshBasicMaterial({color: 0xffff00});
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.rotation.x = Math.PI/2;
-        mesh.add(ring);
-        mesh.userData.bumperRing = ring;
+        
+        // Add radiating rings
+        const ring1Geo = new THREE.TorusGeometry(hData.r * 0.5, 0.05, 16, 32);
+        const ring1Mat = new THREE.MeshBasicMaterial({
+            color: 0xff00ff,
+            transparent: true,
+            opacity: 0.6
+        });
+        const ring1 = new THREE.Mesh(ring1Geo, ring1Mat);
+        ring1.rotation.x = Math.PI / 2;
+        mesh.add(ring1);
+        
+        const ring2Geo = new THREE.TorusGeometry(hData.r * 0.7, 0.04, 16, 32);
+        const ring2Mat = new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.4
+        });
+        const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+        ring2.rotation.x = Math.PI / 2;
+        mesh.add(ring2);
+        
+        mesh.userData.pulsarRing1 = ring1;
+        mesh.userData.pulsarRing2 = ring2;
+        mesh.userData.nextRotationChange = performance.now() + (hData.changeInterval || 3000);
+        mesh.userData.pulse = true;
+        // Initialize speed modulation and axis rotation tracking
+        mesh.userData.speedMod = 1.0;
+        mesh.userData.lastSpeedIncrease = Math.random() > 0.5; // track last change direction
+        mesh.userData.axisRotationVec = new THREE.Vector3(0, 0, 0);
+    } else if (hData.type === 'asteroidbelt') {
+        // Asteroid belt: scattered field of unpoppable boulders like real asteroid belt
+        // Create a parent group for the belt
+        const beltGroup = new THREE.Group();
+        beltGroup.position.set(...hData.pos);
+        
+        // Create multiple irregular boulder meshes scattered in 3D space
+        // More asteroids with varied sizes for realistic distribution
+        const boulderCount = hData.boulderCount || 20;
+        const boulders = [];
+        
+        for (let i = 0; i < boulderCount; i++) {
+            // Create irregular geometry by randomly displacing vertices
+            // Size variation: some small, some medium, few large (realistic distribution)
+            const sizeRoll = Math.random();
+            let sizeMultiplier;
+            if (sizeRoll < 0.6) {
+                // 60% small asteroids
+                sizeMultiplier = 0.05 + Math.random() * 0.03;
+            } else if (sizeRoll < 0.9) {
+                // 30% medium asteroids
+                sizeMultiplier = 0.08 + Math.random() * 0.04;
+            } else {
+                // 10% large asteroids
+                sizeMultiplier = 0.12 + Math.random() * 0.06;
+            }
+            
+            const baseGeo = new THREE.DodecahedronGeometry(hData.r * sizeMultiplier, 0);
+            const positions = baseGeo.attributes.position;
+            
+            // Randomly displace vertices to make irregular rocky shapes
+            for (let j = 0; j < positions.count; j++) {
+                const x = positions.getX(j);
+                const y = positions.getY(j);
+                const z = positions.getZ(j);
+                const factor = 0.6 + Math.random() * 0.8; // More variation in shape
+                positions.setXYZ(j, x * factor, y * factor, z * factor);
+            }
+            baseGeo.computeVertexNormals();
+            
+            // Vary colors slightly for realism (grays and browns)
+            const colorVariation = Math.random();
+            let boulderColor, emissiveColor;
+            if (colorVariation < 0.5) {
+                // Gray asteroids
+                const gray = Math.floor(0x333333 + Math.random() * 0x222222);
+                boulderColor = gray;
+                emissiveColor = Math.floor(gray * 0.3);
+            } else {
+                // Brown/reddish asteroids
+                boulderColor = 0x554433;
+                emissiveColor = 0x221100;
+            }
+            
+            const mat = new THREE.MeshPhongMaterial({
+                color: boulderColor,
+                emissive: emissiveColor,
+                emissiveIntensity: 0.05,
+                flatShading: true,
+                shininess: 5
+            });
+            
+            const boulder = new THREE.Mesh(baseGeo, mat);
+            
+            // Position boulders throughout the volume with more random distribution
+            // Use spherical coordinates but with wider radius variation
+            const theta = Math.random() * Math.PI * 2; // Full circle
+            const phi = Math.acos((Math.random() * 2) - 1); // Full sphere distribution
+            const radius = hData.r * (0.3 + Math.random() * 0.6); // Wide spread from center
+            
+            boulder.position.set(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.sin(phi) * Math.sin(theta),
+                radius * Math.cos(phi)
+            );
+            
+            // Random rotation
+            boulder.rotation.set(
+                Math.random() * Math.PI * 2,
+                Math.random() * Math.PI * 2,
+                Math.random() * Math.PI * 2
+            );
+            
+            // Very slow individual rotation - tumbling effect
+            boulder.userData.rotationSpeed = {
+                x: (Math.random() - 0.5) * 0.0003,
+                y: (Math.random() - 0.5) * 0.0003,
+                z: (Math.random() - 0.5) * 0.0003
+            };
+            
+            beltGroup.add(boulder);
+            boulders.push(boulder);
+        }
+        
+        mesh = beltGroup;
+        mesh.userData.boulders = boulders;
     } else if (hData.type === 'comet') {
         // Use cone geometry as the comet body (no sphere)
         geo = new THREE.ConeGeometry(hData.r * 0.2, hData.r * 1.2, 12);
@@ -122,13 +250,40 @@ function applyHazardForce(bubble, hazard) {
         bubble.userData.vel.add(
             dir.multiplyScalar(-hazard.userData.s * 2.2)
         );
-    } else if (hazard.userData.type === 'bumper') {
-        // Bumper: reflect velocity
-        const relVel = bubble.userData.vel.clone();
-        const normal = bubble.position.clone().sub(hazard.position).normalize();
-        const dot = relVel.dot(normal);
-        if (dot < 0) { // Only reflect if moving toward bumper
-            bubble.userData.vel.sub(normal.multiplyScalar(2 * dot)).multiplyScalar(1.1);
+    } else if (hazard.userData.type === 'pulsar') {
+        // Pulsar doesn't directly affect bubbles - it affects field rotation
+        // (handled in updateHazardVisuals and game.js animation loop)
+        return;
+    } else if (hazard.userData.type === 'asteroidbelt') {
+        // Asteroid belt: check collision with each boulder and deflect
+        if (!hazard.userData.boulders) return;
+        
+        for (let boulder of hazard.userData.boulders) {
+            // Get boulder world position
+            const boulderWorldPos = new THREE.Vector3();
+            boulder.getWorldPosition(boulderWorldPos);
+            
+            // Check distance to bubble
+            // Calculate actual boulder radius from its geometry
+            const boulderGeometry = boulder.geometry;
+            const boulderScale = boulder.scale.x; // Assuming uniform scale
+            const boulderRadius = boulderGeometry.parameters.radius * boulderScale;
+            
+            const distToBoulder = bubble.position.distanceTo(boulderWorldPos);
+            
+            if (distToBoulder < boulderRadius + bubble.geometry.parameters.radius) {
+                // Collision! Deflect bubble
+                const normal = bubble.position.clone().sub(boulderWorldPos).normalize();
+                const dot = bubble.userData.vel.dot(normal);
+                
+                if (dot < 0) { // Only deflect if moving toward boulder
+                    // Reflect velocity off the normal
+                    bubble.userData.vel.sub(normal.multiplyScalar(2 * dot)).multiplyScalar(0.9);
+                    // Push bubble away slightly to prevent sticking
+                    bubble.position.add(normal.multiplyScalar(0.1));
+                }
+                break; // Only process one collision per frame
+            }
         }
     } else if (hazard.userData.type === 'comet') {
         // Comet: weak attraction to create trailing effect
@@ -222,6 +377,36 @@ function updateHazardVisuals(hazard) {
         hazard.scale.setScalar(scale);
     }
     
+    // Pulsar pulsing and ring animation
+    if (hazard.userData.type === 'pulsar') {
+        const time = performance.now();
+        const pulse = 1 + Math.sin(time * 0.005) * 0.2;
+        hazard.scale.setScalar(pulse);
+        
+        // Animate rings
+        if (hazard.userData.pulsarRing1) {
+            hazard.userData.pulsarRing1.rotation.z += 0.03;
+            const ring1Scale = 1 + Math.sin(time * 0.004) * 0.15;
+            hazard.userData.pulsarRing1.scale.setScalar(ring1Scale);
+        }
+        if (hazard.userData.pulsarRing2) {
+            hazard.userData.pulsarRing2.rotation.z -= 0.02;
+            const ring2Scale = 1 + Math.sin(time * 0.006 + Math.PI) * 0.2;
+            hazard.userData.pulsarRing2.scale.setScalar(ring2Scale);
+        }
+    }
+    
+    // Asteroid belt rotation
+    if (hazard.userData.type === 'asteroidbelt' && hazard.userData.boulders) {
+        // No parent group rotation - keep asteroids stationary
+        // Only rotate individual boulders very slowly
+        hazard.userData.boulders.forEach(boulder => {
+            boulder.rotation.x += boulder.userData.rotationSpeed.x;
+            boulder.rotation.y += boulder.userData.rotationSpeed.y;
+            boulder.rotation.z += boulder.userData.rotationSpeed.z;
+        });
+    }
+    
     // Bumper ring rotation
     if (hazard.userData.type === 'bumper' && hazard.userData.bumperRing) {
         hazard.userData.bumperRing.rotation.z += 0.08;
@@ -243,4 +428,61 @@ function clearHazards(scene) {
  */
 function getHazards() {
     return hazards;
+}
+
+/**
+ * Get pulsar rotation modifications for auto-rotate
+ * @returns {object} Rotation speed and axis modifications
+ */
+function getPulsarRotationEffect() {
+    const pulsars = hazards.filter(h => h.userData.type === 'pulsar');
+    if (pulsars.length === 0) {
+        return { speedMultiplier: 1, axisRotationVec: new THREE.Vector3(0, 0, 0) };
+    }
+    
+    const now = performance.now();
+    let totalSpeedMod = 1;
+    const totalAxis = new THREE.Vector3(0, 0, 0);
+    
+    pulsars.forEach(pulsar => {
+        // Check if it's time to change rotation
+        if (now > pulsar.userData.nextRotationChange) {
+            // Alternate speed direction: if last change was increase, now decrease, and vice-versa
+            const willIncrease = !pulsar.userData.lastSpeedIncrease;
+            if (willIncrease) {
+                // Noticeably increase speed (1.3 - 2.0)
+                pulsar.userData.speedMod = 1.3 + Math.random() * 0.7;
+            } else {
+                // Noticeably decrease speed (0.4 - 0.7)
+                pulsar.userData.speedMod = 0.4 + Math.random() * 0.3;
+            }
+            pulsar.userData.lastSpeedIncrease = willIncrease;
+            
+            // Axis rotation change: at least 30 degrees (PI/6) up to 60 degrees (PI/3) per axis
+            const minAngle = Math.PI / 6; // 30 degrees
+            const maxAngle = Math.PI / 3; // 60 degrees
+            const signX = Math.random() > 0.5 ? 1 : -1;
+            const signY = Math.random() > 0.5 ? 1 : -1;
+            const signZ = Math.random() > 0.5 ? 1 : -1;
+            const deltaX = signX * (minAngle + Math.random() * (maxAngle - minAngle));
+            const deltaY = signY * (minAngle + Math.random() * (maxAngle - minAngle));
+            const deltaZ = signZ * (minAngle + Math.random() * (maxAngle - minAngle));
+            
+            // Store the axis rotation delta for this pulsar
+            pulsar.userData.axisRotationVec = new THREE.Vector3(deltaX, deltaY, deltaZ);
+            
+            // Next change in 2-5 seconds
+            pulsar.userData.nextRotationChange = now + 2000 + Math.random() * 3000;
+        }
+        
+        totalSpeedMod *= (pulsar.userData.speedMod || 1);
+        // Accumulate axis rotation vectors
+        const vec = pulsar.userData.axisRotationVec || new THREE.Vector3(0, 0, 0);
+        totalAxis.add(vec);
+    });
+    
+    return {
+        speedMultiplier: totalSpeedMod,
+        axisRotationVec: totalAxis
+    };
 }

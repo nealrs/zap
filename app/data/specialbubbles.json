@@ -2,7 +2,7 @@
   "specialBubbleTypes": {
     "timebonus": {
       "description": "Adds extra seconds to the clock",
-      "color": "0xff00ff",
+      "color": "0x9d00ff",
       "icon": "⏱",
       "lifetime": 5,
       "effect": {
@@ -11,7 +11,7 @@
         "description": "+5 seconds"
       },
       "visual": {
-        "glowColor": 16711935,
+        "glowColor": 10289151,
         "glowIntensity": 0.8,
         "pulseSpeed": 0.05,
         "scale": 1.3
@@ -19,7 +19,7 @@
     },
     "pointsbonus": {
       "description": "Awards extra points toward the target",
-      "color": "0xffd700",
+      "color": "0xffeb3b",
       "icon": "⭐",
       "lifetime": 5,
       "effect": {
@@ -28,7 +28,7 @@
         "description": "+3 pops"
       },
       "visual": {
-        "glowColor": 16766720,
+        "glowColor": 16772923,
         "glowIntensity": 0.6,
         "pulseSpeed": 0.03,
         "scale": 1.2
@@ -36,7 +36,7 @@
     },
     "multipop": {
       "description": "Pop bubbles near it automatically",
-      "color": "0x00aaff",
+      "color": "0x00ffff",
       "icon": "💥",
       "lifetime": 5,
       "effect": {
@@ -46,7 +46,7 @@
         "description": "Explode nearby bubbles"
       },
       "visual": {
-        "glowColor": 43775,
+        "glowColor": 65535,
         "glowIntensity": 1.0,
         "pulseSpeed": 0.08,
         "scale": 1.4,
@@ -69,24 +69,6 @@
         "glowIntensity": 0.7,
         "pulseSpeed": 0.01,
         "scale": 1.15
-      }
-    },
-    "shield": {
-      "description": "Protect one bubble from being affected by hazards",
-      "color": "0x4169e1",
-      "icon": "🛡",
-      "lifetime": 5,
-      "effect": {
-        "type": "shield",
-        "bubbleCount": 1,
-        "durationSeconds": 15,
-        "description": "Bubble immunity"
-      },
-      "visual": {
-        "glowColor": 4351201,
-        "glowIntensity": 0.9,
-        "pulseSpeed": 0.04,
-        "scale": 1.25
       }
     },
     "magnetize": {

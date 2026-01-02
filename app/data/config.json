@@ -1,7 +1,8 @@
 {
   "interaction": {
     "bubbleHitZoneTolerance": 1.1,
-    "comment": "bubbleHitZoneTolerance: Multiplier for bubble click radius (1.1 = 10% larger hit zone)"
+    "clickGraceWindow": 100,
+    "comment": "bubbleHitZoneTolerance: Multiplier for bubble click radius (1.1 = 10% larger hit zone). clickGraceWindow: Grace period in milliseconds to catch bubbles that moved after click."
   },
   "graphics": {
     "antialias": true,

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,8 +24,15 @@
             overflow: hidden; 
             background-color: #000; 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
-            touch-action: none;
+            touch-action: manipulation;
         }
+        
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         canvas { 
             display: block; 
             width: 100vw; 
@@ -96,6 +103,20 @@
             text-align: center; 
             max-width: 80%;
             margin: auto 0;
+        }
+
+        /* Adjust panel spacing for smaller screens / fullscreen mode */
+        @media (max-height: 700px) {
+            .panel {
+                margin: 20px 0;
+                padding: 20px;
+            }
+            
+            #overlay-credits {
+                margin-top: 15px !important;
+                padding-top: 10px !important;
+                font-size: 11px !important;
+            }
         }
 
         h1 {
@@ -483,6 +504,11 @@
             <h2 id="sub-title">Loading...</h2>
             <p id="level-desc">Prepare for the void.</p>
             <button id="start-btn">START</button>
+            <div id="overlay-credits" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); font-size: 12px; line-height: 1.4;">
+                Created by <a href="https://nealshyam.com" target="_blank" rel="noopener" style="color: #a78bfa; text-decoration: none;">Neal Shyam</a> 
+                (<a href="https://github.com/nealrs" target="_blank" rel="noopener" style="color: #a78bfa; text-decoration: none;">@nealrs</a>)<br>
+                © 2026 Neal Shyam. All rights reserved.
+            </div>
         </div>
     </div>
 
@@ -495,6 +521,9 @@
 
     <!-- Hazard Module -->
     <script src="/js/hazards.js"></script>
+    
+    <!-- Soundtrack Module -->
+    <script src="/js/soundtrack.js"></script>
 
     <!-- Game Logic -->
     <script src="/js/game.js"></script>

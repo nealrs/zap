@@ -24,10 +24,14 @@ const initialControlsTarget = { x: 0, y: 0, z: 0 };
 let specialBubbles = [];
 let specialBubbleSpawnTimer = 0;
 let slowmoTimer = 0;
+let magnetizeTimer = 0;
+let magnetizeForce = 0;
+let mouseWorldPos = new THREE.Vector3();
 let gameConfig = null;
 let bubbleNormalMap = null; // Procedural texture for bubbles
 let isDevMode = false; // Flag for dev mode testing
 let loadingStartTime = Date.now(); // Track when loading started
+let pendingClicks = []; // Grace window for missed clicks
 
 
 /**
@@ -509,11 +513,13 @@ function loadLevels() {
         .then(data => {
             levels = data;
             // Parse hex color strings to actual hex numbers
-            levels.forEach(lvl => {
-                if (typeof lvl.color === 'string') {
-                    lvl.color = parseInt(lvl.color, 16);
-                }
-            });
+            if (Array.isArray(levels)) {
+                levels.forEach(lvl => {
+                    if (lvl && typeof lvl.color === 'string') {
+                        lvl.color = parseInt(lvl.color, 16);
+                    }
+                });
+            }
             
             // Check for dev mode
             const devMode = localStorage.getItem('devMode') === 'true';
@@ -598,6 +604,7 @@ function showLevelIntro(idx) {
     const lvl = levels[idx];
     
     document.getElementById('overlay').classList.remove('hidden');
+    document.getElementById('overlay').classList.remove('victory-finale');
     document.getElementById('main-title').innerText = lvl.name;
     document.getElementById('sub-title').innerText = `Level ${idx + 1}`;
     document.getElementById('level-desc').innerText = lvl.desc;
@@ -624,7 +631,8 @@ function showLevelIntro(idx) {
         const selectorBtn = document.createElement('button');
         selectorBtn.id = 'selector-btn';
         selectorBtn.innerText = "All Levels";
-        selectorBtn.style.marginTop = '10px';
+        selectorBtn.style.display = 'block';
+        selectorBtn.style.margin = '10px auto 0';
         selectorBtn.style.fontSize = '14px';
         selectorBtn.style.padding = '8px 16px';
         selectorBtn.style.background = 'rgba(255,255,255,0.1)';
@@ -643,7 +651,9 @@ function showLevelIntro(idx) {
         const devMenuBtn = document.createElement('button');
         devMenuBtn.id = 'selector-btn';
         devMenuBtn.innerText = "← Dev Menu";
-        devMenuBtn.style.marginTop = '10px';
+        devMenuBtn.style.marginTop = '15px';
+        devMenuBtn.style.display = 'block'; // Force new line
+        devMenuBtn.style.width = '100%'; // Full width
         devMenuBtn.style.fontSize = '14px';
         devMenuBtn.style.padding = '8px 16px';
         devMenuBtn.style.background = 'rgba(255,107,107,0.2)';
@@ -663,6 +673,12 @@ function showLevelIntro(idx) {
 function startLevel(idx) {
     const lvl = levels[idx];
     
+    // Safety check
+    if (!lvl) {
+        console.error('Level not found:', idx);
+        return;
+    }
+    
     // Initialize audio context on first level start
     initAudio();
     
@@ -676,9 +692,11 @@ function startLevel(idx) {
     
     // 1. CLEAR EVERYTHING
     bubbles.forEach(b => scene.remove(b));
+    specialBubbles.forEach(b => scene.remove(b));
     clearHazards(scene);
     bubbles = [];
     specialBubbles = [];
+    pendingClicks = []; // Clear pending clicks
     
     // 2. RESET STATE
     score = 0; 
@@ -692,6 +710,19 @@ function startLevel(idx) {
     document.getElementById('target-el').innerText = lvl.target;
     document.getElementById('time-el').innerText = timeLeft;
     document.getElementById('overlay').classList.add('hidden');
+    
+    // Start level soundtrack
+    if (audioContext) {
+        // Resume context if suspended (required on mobile browsers)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+                console.log('AudioContext resumed for soundtrack');
+                generateSoundtrack(audioContext, idx);
+            });
+        } else if (audioContext.state === 'running') {
+            generateSoundtrack(audioContext, idx);
+        }
+    }
 
     // 4. SPAWN HAZARDS
     lvl.hazards.forEach(hData => {
@@ -835,6 +866,11 @@ function endGame(win) {
     // Release wake lock when gameplay ends
     releaseWakeLock();
     
+    // Stop soundtrack
+    if (typeof stopSoundtrack === 'function') {
+        stopSoundtrack();
+    }
+    
     // Play appropriate sound
     if (!win) {
         playFailSound();
@@ -855,39 +891,17 @@ function endGame(win) {
         document.getElementById('sub-title').innerText = "GAME COMPLETE";
         
         let victoryMessage = `${levels.length} LEVELS CONQUERED\n\n`;
-        victoryMessage += `✨ BUBBLE ZAP MASTER ✨\n\n`;
-        victoryMessage += `━━━━━━━━━━━━━━━━━━\n\n`;
-        victoryMessage += `Created by Neal Shyam (@nealrs)\n`;
-        victoryMessage += `© 2026 Neal Shyam. All rights reserved.`;
+        victoryMessage += `✨ BUBBLE ZAP MASTER ✨`;
         
         document.getElementById('level-desc').innerText = victoryMessage;
         
         const btn = document.getElementById('start-btn');
         btn.innerText = "🎮 PLAY AGAIN 🎮";
         btn.onclick = () => {
-            currentIdx = 0;
-            showLevelIntro(0);
-        };
-        
-        // Add "Back to Level Selector" option
-        const selectorBtn = document.createElement('button');
-        selectorBtn.id = 'selector-btn';
-        selectorBtn.innerText = "All Levels";
-        selectorBtn.style.marginTop = '10px';
-        selectorBtn.style.fontSize = '14px';
-        selectorBtn.style.padding = '8px 16px';
-        selectorBtn.style.background = 'rgba(255,255,255,0.1)';
-        selectorBtn.style.border = '1px solid rgba(255,255,255,0.3)';
-        selectorBtn.style.color = 'rgba(255,255,255,0.7)';
-        selectorBtn.onclick = () => {
-            // Remove the temporary button and victory animation
-            if (document.getElementById('selector-btn')) {
-                document.getElementById('selector-btn').remove();
-            }
+            // Remove victory animation and go to level selector
             document.getElementById('overlay').classList.remove('victory-finale');
             showLevelSelector();
         };
-        btn.parentNode.insertBefore(selectorBtn, btn.nextSibling);
         
         // Add victory animation class
         document.getElementById('overlay').classList.add('victory-finale');
@@ -960,7 +974,8 @@ function endGame(win) {
         const selectorBtn = document.createElement('button');
         selectorBtn.id = 'selector-btn';
         selectorBtn.innerText = "All Levels";
-        selectorBtn.style.marginTop = '10px';
+        selectorBtn.style.display = 'block';
+        selectorBtn.style.margin = '10px auto 0';
         selectorBtn.style.fontSize = '14px';
         selectorBtn.style.padding = '8px 16px';
         selectorBtn.style.background = 'rgba(255,255,255,0.1)';
@@ -1013,6 +1028,11 @@ function handleInteraction(x, y) {
         -(y / window.innerHeight) * 2 + 1
     );
     raycaster.setFromCamera(mouse, camera);
+    
+    // Store the 3D world position of the click for grace window
+    const clickWorldPos = new THREE.Vector3();
+    raycaster.ray.at(15, clickWorldPos); // Sample at distance 15 (middle of game space)
+    
     let specialIntersects = raycaster.intersectObjects(specialBubbles, false);
     
     // If no direct hit on special bubbles, check for near-miss
@@ -1072,6 +1092,9 @@ function handleInteraction(x, y) {
             document.getElementById('score-el').innerText = score;
         } else if (type === 'slowmo') {
             slowmoTimer = def.effect.durationSeconds;
+        } else if (type === 'magnetize') {
+            magnetizeTimer = def.effect.durationSeconds;
+            magnetizeForce = def.effect.attractionForce;
         }
         // ...add more effects as needed...
         
@@ -1131,9 +1154,9 @@ function handleInteraction(x, y) {
         // Create particle burst effect
         createParticleBurst(bubblePosition, bubbleColor);
         
-        // Enhanced haptic feedback (pattern: short-short-long)
+        // Stronger haptic feedback (pattern: strong-pause-strong)
         if("vibrate" in navigator) {
-            navigator.vibrate([30, 50, 50]);
+            navigator.vibrate([50, 30, 100]);
         }
         
         // Check for level completion
@@ -1145,6 +1168,128 @@ function handleInteraction(x, y) {
         if (levels[currentIdx].respawnBubbles && score < levels[currentIdx].target) {
             spawnBubble(levels[currentIdx]);
         }
+    } else {
+        // No bubble hit - add to pending clicks for grace window (100ms)
+        const graceWindow = gameConfig?.interaction?.clickGraceWindow || 100;
+        pendingClicks.push({
+            worldPos: clickWorldPos,
+            ray: raycaster.ray.clone(),
+            timestamp: performance.now(),
+            expiresAt: performance.now() + graceWindow
+        });
+    }
+}
+
+/**
+ * Check pending clicks for bubbles that have moved into the click zone
+ */
+function checkPendingClicks() {
+    if (!isRunning || pendingClicks.length === 0) return;
+    
+    const now = performance.now();
+    const tolerance = gameConfig?.interaction?.bubbleHitZoneTolerance || 1.1;
+    const graceRadius = 1.5; // World space radius to check around click position
+    
+    // Remove expired clicks
+    pendingClicks = pendingClicks.filter(click => click.expiresAt > now);
+    
+    // Check each pending click against all bubbles
+    for (let i = pendingClicks.length - 1; i >= 0; i--) {
+        const click = pendingClicks[i];
+        
+        // Check special bubbles first
+        for (let bubble of specialBubbles) {
+            const bubbleRadius = bubble.geometry.parameters.radius;
+            const expandedRadius = bubbleRadius * tolerance;
+            
+            // Check distance from click world position
+            const distance = bubble.position.distanceTo(click.worldPos);
+            
+            if (distance <= expandedRadius + graceRadius) {
+                // Found a bubble! Pop it
+                const type = bubble.userData.specialType;
+                const def = specialBubbleTypes[type];
+                scene.remove(bubble);
+                specialBubbles.splice(specialBubbles.indexOf(bubble), 1);
+                playPopSound();
+                createParticleBurst(bubble.position, def ? parseInt(def.color) : 0xffffff);
+                
+                score++;
+                document.getElementById('score-el').innerText = score;
+                
+                // Apply effect
+                if (type === 'timebonus') {
+                    timeLeft += def.effect.amount;
+                } else if (type === 'pointsbonus') {
+                    score += def.effect.amount;
+                    document.getElementById('score-el').innerText = score;
+                } else if (type === 'multipop') {
+                    let toPop = def.effect.popCount;
+                    let sorted = bubbles.slice().sort((a, b2) => a.position.distanceTo(bubble.position) - b2.position.distanceTo(bubble.position));
+                    for (let j = 0; j < Math.min(toPop, sorted.length); j++) {
+                        scene.remove(sorted[j]);
+                        bubbles.splice(bubbles.indexOf(sorted[j]), 1);
+                        score++;
+                        createParticleBurst(sorted[j].position, 0xffffff);
+                    }
+                    document.getElementById('score-el').innerText = score;
+                } else if (type === 'slowmo') {
+                    slowmoTimer = def.effect.durationSeconds;
+                } else if (type === 'magnetize') {
+                    magnetizeTimer = def.effect.durationSeconds;
+                    magnetizeForce = def.effect.attractionForce;
+                }
+                
+                if(score >= levels[currentIdx].target) {
+                    endGame(true);
+                }
+                
+                // Remove this click from pending
+                pendingClicks.splice(i, 1);
+                return; // Only pop one bubble per check
+            }
+        }
+        
+        // Check regular bubbles
+        for (let bubble of bubbles) {
+            const bubbleRadius = bubble.geometry.parameters.radius;
+            const expandedRadius = bubbleRadius * tolerance;
+            
+            // Check distance from click world position
+            const distance = bubble.position.distanceTo(click.worldPos);
+            
+            if (distance <= expandedRadius + graceRadius) {
+                // Found a bubble! Pop it
+                const bubbleColor = bubble.material.color.getHex();
+                const bubblePosition = bubble.position.clone();
+                
+                scene.remove(bubble);
+                const idx = bubbles.indexOf(bubble);
+                if (idx > -1) bubbles.splice(idx, 1);
+                
+                score++;
+                document.getElementById('score-el').innerText = score;
+                playPopSound();
+                createParticleBurst(bubblePosition, bubbleColor);
+                
+                // Stronger haptic feedback
+                if("vibrate" in navigator) {
+                    navigator.vibrate([50, 30, 100]);
+                }
+                
+                if(score >= levels[currentIdx].target) {
+                    endGame(true);
+                }
+                
+                if (levels[currentIdx].respawnBubbles && score < levels[currentIdx].target) {
+                    spawnBubble(levels[currentIdx]);
+                }
+                
+                // Remove this click from pending
+                pendingClicks.splice(i, 1);
+                return; // Only pop one bubble per check
+            }
+        }
     }
 }
 
@@ -1154,6 +1299,18 @@ function handleInteraction(x, y) {
 function animate() {
     requestAnimationFrame(animate);
     if (typeof controls !== 'undefined' && controls) {
+        // Apply pulsar rotation effects
+        if (isRunning) {
+            const pulsarEffect = getPulsarRotationEffect();
+            controls.autoRotateSpeed = 0.5 * pulsarEffect.speedMultiplier;
+            
+            // Apply axis rotation changes to the scene
+            if (pulsarEffect.axisRotationVec) {
+                scene.rotation.x += pulsarEffect.axisRotationVec.x * 0.01;
+                scene.rotation.y += pulsarEffect.axisRotationVec.y * 0.01;
+                scene.rotation.z += pulsarEffect.axisRotationVec.z * 0.01;
+            }
+        }
         controls.update();
     }
     // Guard: only render if renderer, scene, and camera are ready
@@ -1163,6 +1320,9 @@ function animate() {
     
     if(isRunning) {
         const lvl = levels[currentIdx];
+        
+        // Check pending clicks for grace window
+        checkPendingClicks();
         
         // Update bubble physics
         bubbles.forEach(b => {
@@ -1182,9 +1342,21 @@ function animate() {
                 applyHazardForce(b, h);
                 updateHazardVisuals(h);
             });
+            
+            // Apply magnetize effect - attract bubbles to mouse/touch position
+            if (magnetizeTimer > 0) {
+                const dirToMouse = mouseWorldPos.clone().sub(b.position).normalize();
+                b.userData.vel.add(dirToMouse.multiplyScalar(magnetizeForce));
+            }
 
-            // Update bubble position
-            b.position.add(b.userData.vel);
+            // Apply slowmo speed reduction
+            let velocityMultiplier = 1.0;
+            if (slowmoTimer > 0) {
+                velocityMultiplier = 0.5; // 50% speed during slowmo
+            }
+
+            // Update bubble position with velocity (affected by slowmo)
+            b.position.add(b.userData.vel.clone().multiplyScalar(velocityMultiplier));
             
             // Bounce off the play area boundary
             if(b.position.length() > 25) {
@@ -1261,6 +1433,12 @@ function animate() {
             const pulse = 1 + Math.sin(performance.now() * def.visual.pulseSpeed) * 0.08;
             b.scale.setScalar(scale * pulse);
         }
+        
+        // Only apply physics if game is running and level exists
+        if (!isRunning || !levels[currentIdx]) continue;
+        
+        const lvl = levels[currentIdx];
+        
         // Physics
         b.userData.vel.add(
             b.position.clone().negate().multiplyScalar(lvl.gravity)
@@ -1302,22 +1480,33 @@ function animate() {
             }
             h.rotation.y += 0.02;
         });
-        b.position.add(b.userData.vel);
+        
+        // Apply magnetize effect to special bubbles too
+        if (magnetizeTimer > 0) {
+            const dirToMouse = mouseWorldPos.clone().sub(b.position).normalize();
+            b.userData.vel.add(dirToMouse.multiplyScalar(magnetizeForce));
+        }
+        
+        // Apply slowmo speed reduction
+        let velocityMultiplier = 1.0;
+        if (slowmoTimer > 0) {
+            velocityMultiplier = 0.5; // 50% speed during slowmo
+        }
+        
+        b.position.add(b.userData.vel.clone().multiplyScalar(velocityMultiplier));
         if(b.position.length() > 25) {
             b.userData.vel.multiplyScalar(-0.7);
         }
     }
     
-    // Apply slowmo effect
+    // Decrement slowmo timer
     if (slowmoTimer > 0) {
         slowmoTimer -= 1/60;
-        // Reduce all bubble velocities
-        bubbles.forEach(b => {
-            b.userData.vel.multiplyScalar(0.98);
-        });
-        specialBubbles.forEach(b => {
-            b.userData.vel.multiplyScalar(0.98);
-        });
+    }
+    
+    // Decrement magnetize timer
+    if (magnetizeTimer > 0) {
+        magnetizeTimer -= 1/60;
     }
 }
 
@@ -1353,6 +1542,28 @@ window.addEventListener('load', () => {
     });
     // Add click handlers after scene is initialized
     renderer.domElement.addEventListener('click', e => handleInteraction(e.clientX, e.clientY));
+    
+    // Track mouse position for magnetize effect
+    renderer.domElement.addEventListener('mousemove', e => {
+        const mouse = new THREE.Vector2(
+            (e.clientX / window.innerWidth) * 2 - 1,
+            -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        raycaster.setFromCamera(mouse, camera);
+        raycaster.ray.at(15, mouseWorldPos); // Sample at distance 15 (middle of game space)
+    });
+    
+    // Track touch position for magnetize effect
+    renderer.domElement.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) {
+            const mouse = new THREE.Vector2(
+                (e.touches[0].clientX / window.innerWidth) * 2 - 1,
+                -(e.touches[0].clientY / window.innerHeight) * 2 + 1
+            );
+            raycaster.setFromCamera(mouse, camera);
+            raycaster.ray.at(15, mouseWorldPos);
+        }
+    });
     
     // Initialize audio on first user interaction (mobile Safari fix)
     const initAudioOnInteraction = () => {
