@@ -10,6 +10,7 @@
     "color": "0xffff00",
     "respawnBubbles": false,
     "respawnRate": 0,
+    "spawnRadius": 8,
     "hazards": [],
     "specialBubbles": {
       "enabled": false
@@ -26,6 +27,7 @@
     "color": "0x00ff88",
     "respawnBubbles": false,
     "respawnRate": 0,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "comet",
@@ -50,6 +52,7 @@
     "color": "0xff1493",
     "respawnBubbles": false,
     "respawnRate": 0,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "wormhole",
@@ -73,6 +76,7 @@
     "color": "0x00d4ff",
     "respawnBubbles": false,
     "respawnRate": 0,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "wormhole",
@@ -102,6 +106,7 @@
     "color": "0xff6600",
     "respawnBubbles": true,
     "respawnRate": 3,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "repulsor",
@@ -121,21 +126,24 @@
     "time": 55,
     "count": 26,
     "size": 0.88,
-    "gravity": 0.00028,
+    "gravity": 0.00015,
     "color": "0xffaa00",
     "respawnBubbles": true,
     "respawnRate": 4,
+    "spawnRadius": 10,
     "hazards": [
       {
         "type": "pulsar",
         "pos": [0, 0, 0],
-        "r": 6,
+        "r": 4,
         "s": 0.065,
         "changeInterval": 3000
       }
     ],
     "specialBubbles": {
-      "enabled": false
+      "enabled": true,
+      "types": ["magnetize"],
+      "spawnIntervalSeconds": 2
     }
   },
   {
@@ -149,6 +157,7 @@
     "color": "0xff33ff",
     "respawnBubbles": true,
     "respawnRate": 2,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "wormhole",
@@ -174,6 +183,7 @@
     "color": "0xff9900",
     "respawnBubbles": true,
     "respawnRate": 1,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "repulsor",
@@ -199,6 +209,7 @@
     "color": "0xff0066",
     "respawnBubbles": true,
     "respawnRate": 2,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "comet",
@@ -232,6 +243,7 @@
     "color": "0x00ff00",
     "respawnBubbles": true,
     "respawnRate": 2,
+    "spawnRadius": 8,
     "hazards": [
       {
         "type": "repulsor",

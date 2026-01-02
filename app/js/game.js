@@ -27,6 +27,7 @@ let slowmoTimer = 0;
 let magnetizeTimer = 0;
 let magnetizeForce = 0;
 let mouseWorldPos = new THREE.Vector3();
+let floatingTexts = []; // Array to track floating text elements
 let gameConfig = null;
 let bubbleNormalMap = null; // Procedural texture for bubbles
 let isDevMode = false; // Flag for dev mode testing
@@ -434,6 +435,56 @@ function createParticleBurst(position, color) {
 }
 
 /**
+ * Create floating text that rises and fades away
+ * @param {THREE.Vector3} worldPosition - 3D position in the scene
+ * @param {string} text - Text to display
+ * @param {string} color - CSS color for the text
+ */
+function createFloatingText(worldPosition, text, color = '#ffffff') {
+    // Convert 3D world position to 2D screen position
+    const vector = worldPosition.clone();
+    vector.project(camera);
+    
+    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-(vector.y) * 0.5 + 0.5) * window.innerHeight;
+    
+    // Responsive font size - smaller on mobile
+    const isMobile = window.innerWidth < 768;
+    const fontSize = isMobile ? '18px' : '28px';
+    
+    // Create text element
+    const textEl = document.createElement('div');
+    textEl.style.position = 'absolute';
+    textEl.style.left = x + 'px';
+    textEl.style.top = y + 'px';
+    textEl.style.color = color;
+    textEl.style.fontSize = fontSize;
+    textEl.style.fontWeight = 'bold';
+    textEl.style.textShadow = '0 0 10px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.9)';
+    textEl.style.pointerEvents = 'none';
+    textEl.style.userSelect = 'none';
+    textEl.style.zIndex = '1000';
+    textEl.style.transform = 'translate(-50%, -50%)';
+    textEl.style.whiteSpace = 'nowrap';
+    textEl.style.fontFamily = 'Arial, sans-serif';
+    textEl.innerText = text;
+    
+    document.body.appendChild(textEl);
+    
+    console.log('Created floating text:', text, 'at', x, y); // Debug log
+    
+    // Track for animation
+    floatingTexts.push({
+        element: textEl,
+        worldPos: worldPosition.clone(),
+        startY: y,
+        life: 0,
+        maxLife: 1.0, // 1 second - faster to avoid clutter
+        startTime: Date.now()
+    });
+}
+
+/**
  * Initialize the Three.js scene, camera, and renderer
  */
 function initScene() {
@@ -732,6 +783,14 @@ function startLevel(idx) {
     specialBubbles = [];
     pendingClicks = []; // Clear pending clicks
     
+    // Clear floating texts
+    floatingTexts.forEach(ft => {
+        if (ft.element && ft.element.parentNode) {
+            document.body.removeChild(ft.element);
+        }
+    });
+    floatingTexts = [];
+    
     // 2. RESET STATE
     score = 0; 
     timeLeft = lvl.time;
@@ -796,7 +855,8 @@ function spawnBubble(lvl) {
     // FOV = 60°, minDistance = 8
     // Visible height at minDistance = 2 * tan(30°) * 8 ≈ 9.24
     // Use 80% of that to keep bubbles comfortably in view: 7.4
-    const spawnRadius = 7;
+    // Can be overridden per-level with spawnRadius property
+    const spawnRadius = lvl.spawnRadius || 7;
     
     b.position.set(
         (Math.random()-0.5) * spawnRadius * 2,
@@ -1107,12 +1167,14 @@ function handleInteraction(x, y) {
         score++;
         document.getElementById('score-el').innerText = score;
         
-        // Apply effect
+        // Apply effect and show floating text
         if (type === 'timebonus') {
             timeLeft += def.effect.amount;
+            createFloatingText(b.position, `+${def.effect.amount}s TIME`, '#9d00ff');
         } else if (type === 'pointsbonus') {
             score += def.effect.amount;
             document.getElementById('score-el').innerText = score;
+            createFloatingText(b.position, `+${def.effect.amount} POINTS`, '#ffeb3b');
         } else if (type === 'multipop') {
             // Pop N nearest regular bubbles
             let toPop = def.effect.popCount;
@@ -1124,11 +1186,14 @@ function handleInteraction(x, y) {
                 createParticleBurst(sorted[i].position, 0xffffff);
             }
             document.getElementById('score-el').innerText = score;
+            createFloatingText(b.position, `MULTI POP x${toPop}`, '#00ffff');
         } else if (type === 'slowmo') {
             slowmoTimer = def.effect.durationSeconds;
+            createFloatingText(b.position, `${def.effect.durationSeconds}s SLOW-MO`, '#00ff00');
         } else if (type === 'magnetize') {
             magnetizeTimer = def.effect.durationSeconds;
             magnetizeForce = def.effect.attractionForce;
+            createFloatingText(b.position, `${def.effect.durationSeconds}s MAGNET`, '#ff6600');
         }
         // ...add more effects as needed...
         
@@ -1251,12 +1316,14 @@ function checkPendingClicks() {
                 score++;
                 document.getElementById('score-el').innerText = score;
                 
-                // Apply effect
+                // Apply effect and show floating text
                 if (type === 'timebonus') {
                     timeLeft += def.effect.amount;
+                    createFloatingText(bubble.position, `+${def.effect.amount}s TIME`, '#9d00ff');
                 } else if (type === 'pointsbonus') {
                     score += def.effect.amount;
                     document.getElementById('score-el').innerText = score;
+                    createFloatingText(bubble.position, `+${def.effect.amount} POINTS`, '#ffeb3b');
                 } else if (type === 'multipop') {
                     let toPop = def.effect.popCount;
                     let sorted = bubbles.slice().sort((a, b2) => a.position.distanceTo(bubble.position) - b2.position.distanceTo(bubble.position));
@@ -1267,11 +1334,14 @@ function checkPendingClicks() {
                         createParticleBurst(sorted[j].position, 0xffffff);
                     }
                     document.getElementById('score-el').innerText = score;
+                    createFloatingText(bubble.position, `MULTI POP x${toPop}`, '#00ffff');
                 } else if (type === 'slowmo') {
                     slowmoTimer = def.effect.durationSeconds;
+                    createFloatingText(bubble.position, `${def.effect.durationSeconds}s SLOW-MO`, '#00ff00');
                 } else if (type === 'magnetize') {
                     magnetizeTimer = def.effect.durationSeconds;
                     magnetizeForce = def.effect.attractionForce;
+                    createFloatingText(bubble.position, `${def.effect.durationSeconds}s MAGNET`, '#ff6600');
                 }
                 
                 if(score >= levels[currentIdx].target) {
@@ -1445,6 +1515,37 @@ function animate() {
         if (p.life <= 0) {
             scene.remove(p.system);
             particles.splice(i, 1);
+        }
+    }
+    
+    // Update floating texts
+    for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        const elapsed = (Date.now() - ft.startTime) / 1000; // seconds
+        ft.life = elapsed;
+        
+        // Update position (float upward faster)
+        const vector = ft.worldPos.clone();
+        vector.project(camera);
+        
+        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-(vector.y) * 0.5 + 0.5) * window.innerHeight - (elapsed * 80); // Rise 80px per second (faster)
+        
+        ft.element.style.left = x + 'px';
+        ft.element.style.top = y + 'px';
+        
+        // Fade out quickly at the end
+        const opacity = Math.max(0, 1 - Math.pow(elapsed / ft.maxLife, 2));
+        ft.element.style.opacity = opacity;
+        
+        // Scale up slightly
+        const scale = 1 + (elapsed * 0.2);
+        ft.element.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        
+        // Remove when dead
+        if (ft.life >= ft.maxLife) {
+            document.body.removeChild(ft.element);
+            floatingTexts.splice(i, 1);
         }
     }
     
