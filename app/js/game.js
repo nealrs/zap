@@ -486,10 +486,10 @@ function initScene() {
     
     refDotsGeo.setAttribute('position', new THREE.Float32BufferAttribute(refDotsPos, 3));
     const refDots = new THREE.Points(refDotsGeo, new THREE.PointsMaterial({
-        color: 0x333333,
-        size: 0.5,
+        color: 0x666666,
+        size: 1.0,
         transparent: true,
-        opacity: 0.3
+        opacity: 0.6
     }));
     scene.add(refDots);
 
@@ -590,11 +590,9 @@ function showLevelIntro(idx) {
     isRunning = false; 
     if (timer) clearInterval(timer);
     
-    // Clean up any selector button from previous screen
-    const oldSelectorBtn = document.getElementById('selector-btn');
-    if (oldSelectorBtn) {
-        oldSelectorBtn.remove();
-    }
+    // Clean up any selector buttons from previous screens (remove all instances)
+    const oldSelectorBtns = document.querySelectorAll('#selector-btn');
+    oldSelectorBtns.forEach(btn => btn.remove());
     
     currentIdx = idx;
     const lvl = levels[idx];
@@ -841,6 +839,10 @@ function endGame(win) {
     if (!win) {
         playFailSound();
     }
+    
+    // Clean up any existing selector buttons before adding new ones
+    const oldSelectorBtns = document.querySelectorAll('#selector-btn');
+    oldSelectorBtns.forEach(btn => btn.remove());
     
     document.getElementById('overlay').classList.remove('hidden');
     
