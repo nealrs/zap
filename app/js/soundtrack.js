@@ -5,6 +5,7 @@
 
 let currentSoundtrack = null;
 let soundtrackNodes = [];
+let loopTimer = null; // Track the loop timer globally
 
 /**
  * Generate a space-themed soundtrack using WebAudio API
@@ -24,7 +25,7 @@ function generateSoundtrack(audioCtx, levelIndex) {
         return null;
     }
     
-    // Stop any existing soundtrack
+    // CRITICAL: Stop any existing soundtrack completely before starting new one
     stopSoundtrack();
     
     soundtrackNodes = [];
@@ -33,10 +34,17 @@ function generateSoundtrack(audioCtx, levelIndex) {
     
     console.log('Creating soundtrack for level', levelIndex);
     
-    // Master gain for soundtrack (raised volume for better presence)
+    // Master gain for soundtrack - reduced to prevent clipping with pop sounds
     const masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.25; // Increased from 0.15 for better audibility
-    masterGain.connect(audioCtx.destination);
+    masterGain.gain.value = 0.15; // Reduced from 0.25 to prevent crackling
+    
+    // Connect to compressor if available, otherwise destination
+    if (audioCtx.compressor) {
+        masterGain.connect(audioCtx.compressor);
+    } else {
+        masterGain.connect(audioCtx.destination);
+    }
+    
     soundtrackNodes.push(masterGain);
     
     // Each level gets a unique musical theme
@@ -79,18 +87,45 @@ function generateSoundtrack(audioCtx, levelIndex) {
     
     console.log('Soundtrack nodes created:', soundtrackNodes.length);
     
-    // Schedule loop restart
-    const loopTimer = setInterval(() => {
-        if (audioCtx.state === 'running') {
+    // Schedule loop restart - clear any existing timer first
+    if (loopTimer) {
+        clearInterval(loopTimer);
+        loopTimer = null;
+    }
+    
+    loopTimer = setInterval(() => {
+        if (audioCtx.state === 'running' && currentSoundtrack) {
             console.log('Looping soundtrack for level', levelIndex);
-            generateSoundtrack(audioCtx, levelIndex);
+            // Stop nodes but don't clear the timer (we're in the timer callback)
+            soundtrackNodes.forEach(node => {
+                try {
+                    if (node.stop) node.stop();
+                    if (node.disconnect) node.disconnect();
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+            soundtrackNodes = [];
+            
+            // Restart the soundtrack
+            const newNow = audioCtx.currentTime;
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.15;
+            masterGain.connect(audioCtx.destination);
+            soundtrackNodes.push(masterGain);
+            
+            const newThemeNodes = themes[themeIndex]();
+            soundtrackNodes.push(...newThemeNodes);
         }
     }, duration * 1000);
     
     currentSoundtrack = {
         stop: () => {
             console.log('Stopping soundtrack');
-            clearInterval(loopTimer);
+            if (loopTimer) {
+                clearInterval(loopTimer);
+                loopTimer = null;
+            }
             stopSoundtrack();
         }
     };
@@ -103,6 +138,13 @@ function generateSoundtrack(audioCtx, levelIndex) {
  * Stop the current soundtrack
  */
 function stopSoundtrack() {
+    // Clear the loop timer
+    if (loopTimer) {
+        clearInterval(loopTimer);
+        loopTimer = null;
+    }
+    
+    // Stop and disconnect all audio nodes
     soundtrackNodes.forEach(node => {
         try {
             if (node.stop) node.stop();

@@ -122,6 +122,11 @@ function unlockNextLevel(completedLevel) {
 function showLevelSelector() {
     const maxUnlocked = getUnlockedLevel();
     
+    // Stop soundtrack when showing overlay
+    if (typeof stopSoundtrack === 'function') {
+        stopSoundtrack();
+    }
+    
     document.getElementById('overlay').classList.remove('hidden');
     document.getElementById('overlay').classList.remove('victory-finale');
     document.getElementById('main-title').innerText = "SELECT LEVEL";
@@ -248,11 +253,25 @@ function initAudio() {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             console.log('AudioContext initialized:', audioContext.state);
             
+            // Add a compressor to prevent clipping/crackling
+            const compressor = audioContext.createDynamicsCompressor();
+            compressor.threshold.setValueAtTime(-20, audioContext.currentTime);
+            compressor.knee.setValueAtTime(10, audioContext.currentTime);
+            compressor.ratio.setValueAtTime(12, audioContext.currentTime);
+            compressor.attack.setValueAtTime(0.003, audioContext.currentTime);
+            compressor.release.setValueAtTime(0.25, audioContext.currentTime);
+            compressor.connect(audioContext.destination);
+            
+            // Store compressor for sound effects to use
+            audioContext.compressor = compressor;
+            
             // Safari iOS workaround: create and play a silent buffer
             if (audioContext.state === 'suspended') {
                 const silentBuffer = audioContext.createBuffer(1, 1, 22050);
                 const source = audioContext.createBufferSource();
                 source.buffer = silentBuffer;
+                source.connect(audioContext.destination);
+                source.start(0);
                 source.connect(audioContext.destination);
                 source.start(0);
                 
@@ -297,13 +316,19 @@ function playPopSound() {
         const gain = ctx.createGain();
         
         osc.connect(gain);
-        gain.connect(ctx.destination);
         
-        // High-pitched pop sound
+        // Connect to compressor if available, otherwise destination
+        if (ctx.compressor) {
+            gain.connect(ctx.compressor);
+        } else {
+            gain.connect(ctx.destination);
+        }
+        
+        // High-pitched pop sound - reduced volume to prevent clipping
         osc.frequency.setValueAtTime(800, now);
         osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
         
-        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.setValueAtTime(0.3, now); // Reduced from 0.8 to 0.3
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         
         osc.start(now);
@@ -333,7 +358,13 @@ function playFailSound() {
         
         osc1.connect(gain);
         osc2.connect(gain);
-        gain.connect(ctx.destination);
+        
+        // Connect to compressor if available, otherwise destination
+        if (ctx.compressor) {
+            gain.connect(ctx.compressor);
+        } else {
+            gain.connect(ctx.destination);
+        }
         
         // First "womp" - descending tone
         osc1.frequency.setValueAtTime(200, now);
@@ -565,6 +596,11 @@ function loadLevels() {
  * Show dev finale screen for testing
  */
 function showDevFinale() {
+    // Stop soundtrack when showing overlay
+    if (typeof stopSoundtrack === 'function') {
+        stopSoundtrack();
+    }
+    
     document.getElementById('overlay').classList.remove('hidden');
     document.getElementById('overlay').classList.add('victory-finale');
     
@@ -595,6 +631,11 @@ function showLevelIntro(idx) {
     // Stop any existing game logic
     isRunning = false; 
     if (timer) clearInterval(timer);
+    
+    // Stop soundtrack when showing overlay
+    if (typeof stopSoundtrack === 'function') {
+        stopSoundtrack();
+    }
     
     // Clean up any selector buttons from previous screens (remove all instances)
     const oldSelectorBtns = document.querySelectorAll('#selector-btn');
@@ -1524,6 +1565,11 @@ function handleResize() {
  * @param {string} msg - Error message to display
  */
 function showErrorOverlay(msg) {
+    // Stop soundtrack when showing overlay
+    if (typeof stopSoundtrack === 'function') {
+        stopSoundtrack();
+    }
+    
     const overlay = document.getElementById('overlay');
     overlay.classList.remove('hidden');
     document.getElementById('main-title').innerText = 'ERROR';
