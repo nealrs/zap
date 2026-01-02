@@ -107,7 +107,7 @@ function generateSoundtrack(audioCtx, levelIndex) {
             });
             soundtrackNodes = [];
             
-            // Restart the soundtrack
+            // Restart the soundtrack with current time
             const newNow = audioCtx.currentTime;
             const masterGain = audioCtx.createGain();
             masterGain.gain.value = 0.15;
@@ -121,7 +121,21 @@ function generateSoundtrack(audioCtx, levelIndex) {
             
             soundtrackNodes.push(masterGain);
             
-            const newThemeNodes = themes[themeIndex]();
+            // Recreate themes with updated time
+            const newThemes = [
+                () => createEtherealPad(audioCtx, masterGain, newNow, duration),
+                () => createDeepSpaceDrone(audioCtx, masterGain, newNow, duration),
+                () => createCrystallineChimes(audioCtx, masterGain, newNow, duration),
+                () => createPulsingWaves(audioCtx, masterGain, newNow, duration),
+                () => createCosmicWind(audioCtx, masterGain, newNow, duration),
+                () => createOrbitalMelody(audioCtx, masterGain, newNow, duration),
+                () => createNebulaDream(audioCtx, masterGain, newNow, duration),
+                () => createStellarPulse(audioCtx, masterGain, newNow, duration),
+                () => createAuroraWaves(audioCtx, masterGain, newNow, duration),
+                () => createVoidEcho(audioCtx, masterGain, newNow, duration)
+            ];
+            
+            const newThemeNodes = newThemes[themeIndex]();
             soundtrackNodes.push(...newThemeNodes);
         }
     }, duration * 1000);
