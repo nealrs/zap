@@ -1,7 +1,10 @@
 
 services:
   zap-prod:
-    build: .
+    build:
+      context: .
+      args:
+        - GIT_BRANCH=main
     ports:
       - "1337:3000"
     environment:
@@ -13,7 +16,10 @@ services:
      - proxy-network
 
   zap-dev:
-    build: .
+    build:
+      context: .
+      args:
+        - GIT_BRANCH=dev
     ports:
       - "1338:3000"
     environment:

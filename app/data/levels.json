@@ -11,6 +11,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [],
     "specialBubbles": {
       "enabled": false
@@ -28,6 +29,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "comet",
@@ -53,6 +55,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "wormhole",
@@ -77,6 +80,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "wormhole",
@@ -107,6 +111,7 @@
     "respawnBubbles": true,
     "respawnRate": 3,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "repulsor",
@@ -131,6 +136,7 @@
     "respawnBubbles": true,
     "respawnRate": 4,
     "spawnRadius": 10,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "pulsar",
@@ -158,6 +164,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "wormhole",
@@ -184,6 +191,7 @@
     "respawnBubbles": true,
     "respawnRate": 1,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "repulsor",
@@ -210,6 +218,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "comet",
@@ -244,6 +253,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 8,
+    "cameraZoom": 40,
     "hazards": [
       {
         "type": "repulsor",
@@ -256,6 +266,314 @@
       "enabled": true,
       "types": ["multipop"],
       "spawnIntervalSeconds": 5.5
+    }
+  },
+  {
+    "name": "Gravity Well",
+    "desc": "Navigate a single pulsar's gravity while collecting time bonuses.",
+    "target": 32,
+    "time": 55,
+    "count": 35,
+    "size": 0.72,
+    "gravity": 0.00035,
+    "color": "0x4169e1",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 9,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "pulsar",
+        "pos": [0, 0, 0],
+        "r": 5,
+        "s": 0.05,
+        "changeInterval": 3500
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["timebonus", "pointsbonus"],
+      "spawnIntervalSeconds": 6
+    }
+  },
+  {
+    "name": "Scattered Chaos",
+    "desc": "Wide spread bubbles with wormhole interference. Stay sharp!",
+    "target": 38,
+    "time": 58,
+    "count": 40,
+    "size": 0.70,
+    "gravity": 0.0004,
+    "color": "0xff1493",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 11,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "wormhole",
+        "pos": [0, -7, 0],
+        "r": 6,
+        "s": 0.035
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["magnetize"],
+      "spawnIntervalSeconds": 8
+    }
+  },
+  {
+    "name": "Twin Repulsion",
+    "desc": "Two repulsors create a push-pull challenge. Time your moves!",
+    "target": 35,
+    "time": 60,
+    "count": 37,
+    "size": 0.68,
+    "gravity": 0.00045,
+    "color": "0xff8c00",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 9,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "repulsor",
+        "pos": [6, 0, 0],
+        "r": 7,
+        "s": 0.04
+      },
+      {
+        "type": "repulsor",
+        "pos": [-6, 0, 0],
+        "r": 7,
+        "s": 0.04
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["slowmo"],
+      "spawnIntervalSeconds": 9
+    }
+  },
+  {
+    "name": "Comet Chase",
+    "desc": "Fast comets sweep the field. Use magnetize to gather bubbles!",
+    "target": 40,
+    "time": 57,
+    "count": 42,
+    "size": 0.65,
+    "gravity": 0.0005,
+    "color": "0x00bfff",
+    "respawnBubbles": true,
+    "respawnRate": 1,
+    "spawnRadius": 10,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "comet",
+        "pos": [0, 8, 0],
+        "r": 11,
+        "s": 0.007,
+        "moveSpeed": 0.045
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["magnetize", "timebonus"],
+      "spawnIntervalSeconds": 7
+    }
+  },
+  {
+    "name": "Pressure Chamber",
+    "desc": "Tight quarters with high gravity. Every second counts!",
+    "target": 36,
+    "time": 52,
+    "count": 38,
+    "size": 0.62,
+    "gravity": 0.00055,
+    "color": "0xff4500",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 7,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "wormhole",
+        "pos": [0, 0, 0],
+        "r": 5,
+        "s": 0.04
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["pointsbonus", "multipop"],
+      "spawnIntervalSeconds": 8
+    }
+  },
+  {
+    "name": "Cosmic Pinball",
+    "desc": "Twin pulsars create unpredictable motion. Adapt fast!",
+    "target": 42,
+    "time": 60,
+    "count": 43,
+    "size": 0.60,
+    "gravity": 0.0006,
+    "color": "0x9400d3",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 10,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "pulsar",
+        "pos": [5, 0, 0],
+        "r": 4,
+        "s": 0.06,
+        "changeInterval": 2500
+      },
+      {
+        "type": "pulsar",
+        "pos": [-5, 0, 0],
+        "r": 4,
+        "s": 0.06,
+        "changeInterval": 2500
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["slowmo", "magnetize"],
+      "spawnIntervalSeconds": 10
+    }
+  },
+  {
+    "name": "Repulsor Storm",
+    "desc": "Fast respawns with a powerful repulsor. Chain multipops!",
+    "target": 38,
+    "time": 58,
+    "count": 40,
+    "size": 0.58,
+    "gravity": 0.00065,
+    "color": "0xffd700",
+    "respawnBubbles": true,
+    "respawnRate": 1,
+    "spawnRadius": 9,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "repulsor",
+        "pos": [0, 0, 0],
+        "r": 11,
+        "s": 0.07
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["multipop", "pointsbonus"],
+      "spawnIntervalSeconds": 9
+    }
+  },
+  {
+    "name": "Velocity Storm",
+    "desc": "Twin comets race through a dense field. Perfect your timing!",
+    "target": 44,
+    "time": 60,
+    "count": 45,
+    "size": 0.55,
+    "gravity": 0.0007,
+    "color": "0xff1493",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 11,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "comet",
+        "pos": [7, 0, 0],
+        "r": 12,
+        "s": 0.008,
+        "moveSpeed": 0.05
+      },
+      {
+        "type": "comet",
+        "pos": [-7, 0, 0],
+        "r": 12,
+        "s": 0.008,
+        "moveSpeed": 0.048
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["slowmo"],
+      "spawnIntervalSeconds": 11
+    }
+  },
+  {
+    "name": "Wormhole Nexus",
+    "desc": "Twin wormholes scatter everything. Use all your skills!",
+    "target": 40,
+    "time": 55,
+    "count": 42,
+    "size": 0.52,
+    "gravity": 0.00075,
+    "color": "0x00ced1",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 12,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "wormhole",
+        "pos": [8, 0, 0],
+        "r": 7,
+        "s": 0.045
+      },
+      {
+        "type": "wormhole",
+        "pos": [-8, 0, 0],
+        "r": 7,
+        "s": 0.045
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["timebonus", "magnetize"],
+      "spawnIntervalSeconds": 8
+    }
+  },
+  {
+    "name": "The Final Gauntlet",
+    "desc": "Maximum challenge: twin pulsars, tiny bubbles, extreme gravity. This is it!",
+    "target": 45,
+    "time": 60,
+    "count": 45,
+    "size": 0.50,
+    "gravity": 0.0008,
+    "color": "0xff0000",
+    "respawnBubbles": true,
+    "respawnRate": 2,
+    "spawnRadius": 12,
+    "cameraZoom": 40,
+    "hazards": [
+      {
+        "type": "pulsar",
+        "pos": [6, 0, 0],
+        "r": 5,
+        "s": 0.07,
+        "changeInterval": 2000
+      },
+      {
+        "type": "pulsar",
+        "pos": [-6, 0, 0],
+        "r": 5,
+        "s": 0.07,
+        "changeInterval": 2000
+      }
+    ],
+    "specialBubbles": {
+      "enabled": true,
+      "types": ["multipop", "slowmo"],
+      "spawnIntervalSeconds": 12
     }
   }
 ]

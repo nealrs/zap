@@ -100,6 +100,8 @@ Each level is a JSON object with this schema:
   "size": 0.9,
   "gravity": 0.0002,
   "color": "0xff0000",
+  "spawnRadius": 8,
+  "cameraZoom": 25,
   "hazards": [
     {
       "type": "wormhole",
@@ -128,6 +130,8 @@ Each level is a JSON object with this schema:
 | `size` | number | 0.1-2 | Bubble sphere radius (larger = easier to click) |
 | `gravity` | number | 0.00001-0.001 | Pull toward center (0.0001 = very weak) |
 | `color` | string | hex | Color as hex string (e.g., "0xff0000" for red) |
+| `spawnRadius` | number | 5-15 | Radius of spawn area (larger = more spread out) |
+| `cameraZoom` | number | 10-40 | Camera distance (higher = wider view, 40 = max zoom out) |
 | `hazards` | array | - | Array of obstacle objects |
 | `specialBubbles` | object | - | Special bubble configuration |
 
@@ -138,12 +142,16 @@ Make a level **easier**:
 - ↓ Decrease `target` (fewer pops needed)
 - ↓ Decrease `count` (fewer bubbles)
 - ↓ Decrease `gravity` (weaker pull)
+- ↑ Increase `cameraZoom` (wider view, easier to see all bubbles)
+- ↑ Increase `spawnRadius` (bubbles more spread out)
 
 Make a level **harder**:
 - ↓ Decrease `time` (fewer seconds)
 - ↑ Increase `target` (more pops needed)
 - ↑ Increase `count` (more bubbles)
 - ↑ Increase `gravity` (stronger pull)
+- ↓ Decrease `cameraZoom` (closer view, harder to track all bubbles)
+- ↓ Decrease `spawnRadius` (bubbles clustered together)
 - Add `hazards` to the level
 
 ---

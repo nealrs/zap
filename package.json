@@ -7,9 +7,14 @@
   "scripts": {
     "start": "node server.js",
     "dev": "ENV=dev node --watch server.js",
-    "generate-icons": "./generate-icons.sh"
+    "generate-icons": "./tools/generate-icons.sh",
+    "generate-audio": "node tools/generate-audio-headless.js",
+    "publish": "node scripts/publish.js"
   },
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.34.0"
   }
 }

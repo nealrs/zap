@@ -170,30 +170,64 @@ function createHazard(hData, scene) {
         mesh = beltGroup;
         mesh.userData.boulders = boulders;
     } else if (hData.type === 'comet') {
-        // Use cone geometry as the comet body (no sphere)
-        geo = new THREE.ConeGeometry(hData.r * 0.2, hData.r * 1.2, 12);
-        mat = new THREE.MeshPhongMaterial({
-            color: 0x00ffff,
-            emissive: 0x00aaff,
-            emissiveIntensity: 0.9,
+        // Create comet head (glowing ice ball)
+        const headGeo = new THREE.SphereGeometry(hData.r * 0.3, 16, 16);
+        const headMat = new THREE.MeshPhongMaterial({
+            color: 0xaaddff,
+            emissive: 0x88ccff,
+            emissiveIntensity: 1.2,
             transparent: true,
-            opacity: 0.85
+            opacity: 0.9,
+            shininess: 100
         });
-        mesh = new THREE.Mesh(geo, mat);
+        const head = new THREE.Mesh(headGeo, headMat);
         
-        // Rotate cone to point forward
-        mesh.rotation.x = -Math.PI / 2;
+        // Create glowing cone tail
+        const tailGeo = new THREE.ConeGeometry(hData.r * 0.4, hData.r * 2, 16);
+        const tailMat = new THREE.MeshBasicMaterial({
+            color: 0x4488ff,
+            transparent: true,
+            opacity: 0.5
+        });
+        const tail = new THREE.Mesh(tailGeo, tailMat);
+        tail.rotation.x = Math.PI / 2; // Point backward
+        tail.position.z = hData.r * 0.8; // Offset behind head
         
-        // Initialize random movement direction
+        // Create particle trail effect using small spheres
+        const trailGroup = new THREE.Group();
+        for (let i = 0; i < 12; i++) {
+            const trailGeo = new THREE.SphereGeometry(hData.r * 0.15 * (1 - i / 12), 8, 8);
+            const trailMat = new THREE.MeshBasicMaterial({
+                color: 0x6699ff,
+                transparent: true,
+                opacity: 0.4 * (1 - i / 12)
+            });
+            const trailParticle = new THREE.Mesh(trailGeo, trailMat);
+            trailParticle.position.z = hData.r * 1.2 + i * (hData.r * 0.3);
+            trailGroup.add(trailParticle);
+        }
+        
+        // Combine into group
+        const cometGroup = new THREE.Group();
+        cometGroup.add(head);
+        cometGroup.add(tail);
+        cometGroup.add(trailGroup);
+        mesh = cometGroup;
+        
+        mesh.userData.head = head;
+        mesh.userData.tail = tail;
+        mesh.userData.trail = trailGroup;
+        
+        // Initialize movement
         const angle = Math.random() * Math.PI * 2;
-        const elevation = (Math.random() - 0.5) * Math.PI * 0.5;
+        const elevation = (Math.random() - 0.5) * Math.PI * 0.3;
         mesh.userData.moveDir = new THREE.Vector3(
             Math.cos(angle) * Math.cos(elevation),
             Math.sin(elevation),
             Math.sin(angle) * Math.cos(elevation)
         );
         mesh.userData.moveSpeed = hData.moveSpeed || 0.15;
-        mesh.userData.nextDirChange = performance.now() + 2000 + Math.random() * 3000;
+        mesh.userData.nextDirChange = performance.now() + 3000 + Math.random() * 4000;
         mesh.userData.trailingBubbles = [];
     } else {
         // Default hazard
@@ -358,12 +392,21 @@ function updateHazardVisuals(hazard) {
             hazard.position.multiplyScalar(17 / distFromCenter);
         }
         
-        // Orient cone to point in movement direction
+        // Orient comet to point in movement direction
         const moveDir = hazard.userData.moveDir.clone().normalize();
-        const targetPoint = hazard.position.clone().add(moveDir.multiplyScalar(10));
-        hazard.lookAt(targetPoint);
-        // Adjust rotation since cone points along Y axis by default
-        hazard.rotateX(-Math.PI / 2);
+        const up = new THREE.Vector3(0, 1, 0);
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), moveDir);
+        hazard.quaternion.copy(quaternion);
+        
+        // Animate trail particles
+        if (hazard.userData.trail) {
+            hazard.userData.trail.children.forEach((particle, i) => {
+                const offset = Math.sin(performance.now() * 0.005 + i * 0.5) * 0.1;
+                particle.position.x = offset * Math.cos(i);
+                particle.position.y = offset * Math.sin(i);
+            });
+        }
         
         return; // Skip default rotation for comets
     }

@@ -1,6 +1,7 @@
 {
   "name": "BubbleZap 3D",
   "short_name": "BubbleZap",
+  "version": "1.0.0",
   "description": "A fast-paced physics-based bubble popping game with hazardous obstacles",
   "categories": ["games", "entertainment"],
   "lang": "en-US",

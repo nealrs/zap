@@ -1,0 +1,6 @@
+# features to add
+
+
+1. let's also create an additional 10 levels, with up to 2 hazards (if multiple hazards, only use 1 kind - and make this rare), up to 2 kinds of special bubbles, but slow down the special bubble spawn rates. reuse the existing 10 soundtracks, reduce bubble size and increase distribution as levels get harder -- but not so small that they are unclickable on mobile. game should be challening, but winnable. no level should be longer than 60s. and no bubblecount should exceed 45. 
+
+2. add a new dev route called /dev/builder that let's me create and visualize a new level, by enabling me to add and configure the level json including adding hazards and special bubbles and configuring all the things we already encode in JSON. I shouldn't be able to add more than 2 hazards. I shouldn't be able to add more than 2 types of special bubbles. and i should be able to start, pause, restart the level. and i should be able to play it while in this vie -- like im playing on a phone. and i should be able to export or download the configured/current level json so i can add it back to the game. This route will be ideally used on a computer / laptop / tablet, rather than a phone - so think landspace layout with config panel & controls on the left, and then the field of play (portrait view) on the right

@@ -13,6 +13,7 @@ let scene, camera, renderer, controls, raycaster;
 
 // Audio context (for sound effects)
 let audioContext = null;
+let isMuted = false; // Mute state
 
 // Wake Lock
 let wakeLock = null;
@@ -95,6 +96,12 @@ function hideLoadingScreen() {
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
             }, 600);
+            
+            // Display version if available
+            const versionEl = document.getElementById('version-display');
+            if (versionEl && typeof window.BUBBLEZAP_VERSION !== 'undefined') {
+                versionEl.textContent = `v${window.BUBBLEZAP_VERSION}`;
+            }
         }, remainingTime);
     }
 }
@@ -295,9 +302,19 @@ function initAudio() {
 }
 
 /**
- * Play a pop sound effect using Web Audio API
+ * Play a pop sound effect
+ * Uses AudioManager for HTML5 Audio fallback on Safari
  */
 function playPopSound() {
+    if (isMuted) return; // Check mute state
+    
+    // Use AudioManager if available (handles Web Audio vs HTML5 Audio)
+    if (typeof AudioManager !== 'undefined' && AudioManager.isInitialized) {
+        AudioManager.playPopSound();
+        return;
+    }
+    
+    // Fallback to Web Audio API (legacy)
     try {
         const ctx = initAudio();
         if (!ctx) {
@@ -336,8 +353,18 @@ function playPopSound() {
 
 /**
  * Play a "womp womp" failure sound effect
+ * Uses AudioManager for HTML5 Audio fallback on Safari
  */
 function playFailSound() {
+    if (isMuted) return; // Check mute state
+    
+    // Use AudioManager if available (handles Web Audio vs HTML5 Audio)
+    if (typeof AudioManager !== 'undefined' && AudioManager.isInitialized) {
+        AudioManager.playFailSound();
+        return;
+    }
+    
+    // Fallback to Web Audio API (legacy)
     try {
         const ctx = initAudio();
         if (!ctx) {
@@ -412,12 +439,18 @@ function createParticleBurst(position, color) {
     
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
     
+    // Ensure color is a THREE.Color object
+    const particleColor = new THREE.Color(color);
+    
     const particleMaterial = new THREE.PointsMaterial({
-        color: color,
-        size: 0.3,
+        color: particleColor,
+        size: 5.0,
         transparent: true,
-        opacity: 0.8,
-        sizeAttenuation: true
+        opacity: 1.0,
+        sizeAttenuation: false,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
     });
     
     const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
@@ -804,16 +837,21 @@ function startLevel(idx) {
     document.getElementById('time-el').innerText = timeLeft;
     document.getElementById('overlay').classList.add('hidden');
     
-    // Start level soundtrack
-    if (audioContext) {
-        // Resume context if suspended (required on mobile browsers)
-        if (audioContext.state === 'suspended') {
-            audioContext.resume().then(() => {
-                console.log('AudioContext resumed for soundtrack');
+    // Start level soundtrack (if not muted)
+    if (!isMuted) {
+        // Use AudioManager if available
+        if (typeof AudioManager !== 'undefined' && AudioManager.isInitialized) {
+            AudioManager.startSoundtrack(idx);
+        } else if (audioContext) {
+            // Fallback to Web Audio API (legacy)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log('AudioContext resumed for soundtrack');
+                    generateSoundtrack(audioContext, idx);
+                });
+            } else if (audioContext.state === 'running') {
                 generateSoundtrack(audioContext, idx);
-            });
-        } else if (audioContext.state === 'running') {
-            generateSoundtrack(audioContext, idx);
+            }
         }
     }
 
@@ -833,46 +871,104 @@ function startLevel(idx) {
 }
 
 /**
+ * Start a level from a JSON configuration object (for builder/embed mode)
+ * @param {object} levelConfig - Level configuration object matching levels.json format
+ */
+function startLevelFromConfig(levelConfig) {
+    // Validate config
+    if (!levelConfig) {
+        console.error('Invalid level config');
+        return;
+    }
+    
+    // Initialize audio context on first level start
+    initAudio();
+    
+    // Request wake lock to keep screen awake during gameplay
+    requestWakeLock();
+    
+    // Reset camera position and orbit controls
+    camera.position.copy(new THREE.Vector3(initialCameraPos.x, initialCameraPos.y, initialCameraPos.z));
+    controls.target.copy(new THREE.Vector3(initialControlsTarget.x, initialControlsTarget.y, initialControlsTarget.z));
+    controls.reset();
+    
+    // 1. CLEAR EVERYTHING
+    bubbles.forEach(b => scene.remove(b));
+    specialBubbles.forEach(b => scene.remove(b));
+    clearHazards(scene);
+    bubbles = [];
+    specialBubbles = [];
+    pendingClicks = []; // Clear pending clicks
+    
+    // Clear floating texts
+    floatingTexts.forEach(ft => {
+        if (ft.element && ft.element.parentNode) {
+            document.body.removeChild(ft.element);
+        }
+    });
+    floatingTexts = [];
+    
+    // 2. RESET STATE
+    score = 0; 
+    timeLeft = levelConfig.time;
+    isRunning = true;
+    specialBubbleSpawnTimer = 0;
+
+    // 3. UPDATE UI
+    document.getElementById('score-el').innerText = "0";
+    document.getElementById('target-el').innerText = levelConfig.target;
+    document.getElementById('time-el').innerText = timeLeft;
+    
+    // Hide overlay if present
+    const overlay = document.getElementById('overlay');
+    if (overlay) overlay.classList.add('hidden');
+    
+    // Update level name if in campaign mode
+    const levelEl = document.getElementById('level-el');
+    if (levelEl && !window.embedMode) {
+        levelEl.innerText = levelConfig.name || 'Custom';
+    }
+    
+    // 4. APPLY LEVEL SETTINGS
+    // Camera zoom
+    if (levelConfig.cameraZoom) {
+        camera.position.z = levelConfig.cameraZoom;
+    }
+    
+    // Auto rotate
+    if (controls && levelConfig.autoRotate !== undefined) {
+        controls.autoRotate = levelConfig.autoRotate;
+    }
+    
+    // 5. SPAWN HAZARDS
+    levelConfig.hazards.forEach(hData => {
+        createHazard(hData, scene);
+    });
+
+    // 6. INITIAL BUBBLE SPAWN
+    for(let i=0; i<levelConfig.count; i++) {
+        spawnBubbleInScene(levelConfig, scene, bubbles, bubbleNormalMap);
+    }
+
+    // 7. START GAME TIMER
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+        if(!isRunning) return;
+        timeLeft--;
+        document.getElementById('time-el').innerText = timeLeft;
+        if(timeLeft <= 0) endGame(false);
+    }, 1000);
+    
+    // Store current config for respawn and special bubbles
+    window.currentLevelConfig = levelConfig;
+}
+
+/**
  * Spawn a single bubble in the scene
  * @param {object} lvl - Level configuration object
  */
 function spawnBubble(lvl) {
-    const geo = new THREE.SphereGeometry(lvl.size, 16, 16);
-    const mat = new THREE.MeshPhysicalMaterial({ 
-        color: lvl.color,
-        emissive: lvl.color,
-        emissiveIntensity: 0.4,
-        transmission: 0.3,
-        roughness: 0.2, 
-        transparent: true,
-        opacity: 1.0,
-        normalMap: bubbleNormalMap,
-        normalScale: new THREE.Vector2(0.3, 0.3)
-    });
-    const b = new THREE.Mesh(geo, mat);
-    
-    // Calculate safe spawn area based on camera frustum at minDistance (closest zoom)
-    // FOV = 60°, minDistance = 8
-    // Visible height at minDistance = 2 * tan(30°) * 8 ≈ 9.24
-    // Use 80% of that to keep bubbles comfortably in view: 7.4
-    // Can be overridden per-level with spawnRadius property
-    const spawnRadius = lvl.spawnRadius || 7;
-    
-    b.position.set(
-        (Math.random()-0.5) * spawnRadius * 2,
-        (Math.random()-0.5) * spawnRadius * 2,
-        (Math.random()-0.5) * spawnRadius * 2
-    );
-    b.userData = b.userData || {};
-    b.userData.vel = new THREE.Vector3(
-        (Math.random()-0.5)*0.1,
-        (Math.random()-0.5)*0.1,
-        (Math.random()-0.5)*0.1
-    );
-    // Wormhole immunity: when a bubble is teleported, it becomes immune for 0.5 seconds
-    b.userData.wormholeImmunity = 0;
-    scene.add(b);
-    bubbles.push(b);
+    spawnBubbleInScene(lvl, scene, bubbles, bubbleNormalMap);
 }
 
 /**
@@ -880,63 +976,7 @@ function spawnBubble(lvl) {
  * @param {object} lvl - Level configuration object
  */
 function spawnSpecialBubble(lvl) {
-    if (!lvl.specialBubbles || !lvl.specialBubbles.enabled) return;
-    const types = lvl.specialBubbles.types || [];
-    if (types.length === 0) return;
-    // Pick a random type from allowed
-    const type = types[Math.floor(Math.random() * types.length)];
-    const def = specialBubbleTypes[type];
-    if (!def) return;
-    const geo = new THREE.SphereGeometry(lvl.size * (def.visual?.scale || 1.2), 16, 16);
-    const mat = new THREE.MeshPhysicalMaterial({
-        color: parseInt(def.color),
-        emissive: def.visual?.glowColor || parseInt(def.color),
-        emissiveIntensity: def.visual?.glowIntensity || 0.7,
-        transmission: 0.3,
-        roughness: 0.05,
-        metalness: 0.3,
-        transparent: true,
-        opacity: 0.95,
-        normalMap: bubbleNormalMap,
-        normalScale: new THREE.Vector2(0.8, 0.8),
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1
-    });
-    const b = new THREE.Mesh(geo, mat);
-    
-    // Add glowing ring around special bubbles for extra distinction
-    const ringGeo = new THREE.TorusGeometry(lvl.size * (def.visual?.scale || 1.2) * 1.1, 0.05, 8, 16);
-    const ringMat = new THREE.MeshBasicMaterial({
-        color: def.visual?.glowColor || parseInt(def.color),
-        transparent: true,
-        opacity: 0.6
-    });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2;
-    b.add(ring);
-    b.userData.ring = ring;
-    
-    // Use same safe spawn area as regular bubbles
-    const spawnRadius = 7;
-    
-    b.position.set(
-        (Math.random()-0.5) * spawnRadius * 2,
-        (Math.random()-0.5) * spawnRadius * 2,
-        (Math.random()-0.5) * spawnRadius * 2
-    );
-    b.userData = b.userData || {};
-    b.userData.vel = new THREE.Vector3(
-        (Math.random()-0.5)*0.1,
-        (Math.random()-0.5)*0.1,
-        (Math.random()-0.5)*0.1
-    );
-    b.userData.special = true;
-    b.userData.specialType = type;
-    b.userData.wormholeImmunity = 0;
-    b.userData.spawnTime = performance.now();
-    b.userData.lifetime = (def.lifetime || 5) * 1000; // Convert seconds to milliseconds
-    scene.add(b);
-    specialBubbles.push(b);
+    spawnSpecialBubbleInScene(lvl, scene, specialBubbles, specialBubbleTypes, bubbleNormalMap);
 }
 
 /**
@@ -1264,8 +1304,9 @@ function handleInteraction(x, y) {
         }
         
         // Spawn new bubble if respawn is enabled and target not yet reached
-        if (levels[currentIdx].respawnBubbles && score < levels[currentIdx].target) {
-            spawnBubble(levels[currentIdx]);
+        const lvl = window.currentLevelConfig || levels[currentIdx];
+        if (lvl && lvl.respawnBubbles && score < lvl.target) {
+            spawnBubbleInScene(lvl, scene, bubbles, bubbleNormalMap);
         }
     } else {
         // No bubble hit - add to pending clicks for grace window (100ms)
@@ -1385,8 +1426,9 @@ function checkPendingClicks() {
                     endGame(true);
                 }
                 
-                if (levels[currentIdx].respawnBubbles && score < levels[currentIdx].target) {
-                    spawnBubble(levels[currentIdx]);
+                const lvl = window.currentLevelConfig || levels[currentIdx];
+                if (lvl && lvl.respawnBubbles && score < lvl.target) {
+                    spawnBubbleInScene(lvl, scene, bubbles, bubbleNormalMap);
                 }
                 
                 // Remove this click from pending
@@ -1423,7 +1465,7 @@ function animate() {
     }
     
     if(isRunning) {
-        const lvl = levels[currentIdx];
+        const lvl = window.currentLevelConfig || levels[currentIdx];
         
         // Check pending clicks for grace window
         checkPendingClicks();
@@ -1570,9 +1612,9 @@ function animate() {
         }
         
         // Only apply physics if game is running and level exists
-        if (!isRunning || !levels[currentIdx]) continue;
+        if (!isRunning || (!window.currentLevelConfig && !levels[currentIdx])) continue;
         
-        const lvl = levels[currentIdx];
+        const lvl = window.currentLevelConfig || levels[currentIdx];
         
         // Physics
         b.userData.vel.add(
@@ -1676,6 +1718,12 @@ function showErrorOverlay(msg) {
 
 // Initialize when window loads
 window.addEventListener('load', () => {
+    // Display version on loading screen
+    const loadingVersionEl = document.getElementById('loading-version');
+    if (loadingVersionEl && typeof window.BUBBLEZAP_VERSION !== 'undefined') {
+        loadingVersionEl.textContent = `v${window.BUBBLEZAP_VERSION}`;
+    }
+    
     initScene();
     loadGameConfig(() => {
         loadSpecialBubblesConfig(loadLevels);
@@ -1713,6 +1761,74 @@ window.addEventListener('load', () => {
     };
     document.addEventListener('touchstart', initAudioOnInteraction, { once: true });
     document.addEventListener('click', initAudioOnInteraction, { once: true });
+    
+    // Mute button handler
+    const muteBtn = document.getElementById('mute-btn');
+    if (muteBtn) {
+        muteBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent bubble popping
+            isMuted = !isMuted;
+            muteBtn.textContent = isMuted ? '🔇' : '🔊';
+            muteBtn.style.opacity = isMuted ? '0.5' : '0.8';
+            
+            // Update AudioManager mute state if available
+            if (typeof AudioManager !== 'undefined' && AudioManager.isInitialized) {
+                AudioManager.setMuted(isMuted);
+            }
+            
+            // Handle soundtrack
+            if (isMuted) {
+                // Stop soundtrack when muting
+                if (typeof AudioManager !== 'undefined' && AudioManager.isInitialized) {
+                    AudioManager.stopSoundtrack();
+                } else if (typeof stopSoundtrack === 'function') {
+                    stopSoundtrack();
+                }
+            } else {
+                // Restart soundtrack when unmuting (if game is running)
+                if (typeof AudioManager !== 'undefined' && AudioManager.isInitialized) {
+                    if (isRunning) {
+                        AudioManager.startSoundtrack(currentIdx);
+                    }
+                } else {
+                    if (!audioContext) {
+                        initAudio();
+                    }
+                    if (isRunning && audioContext && typeof generateSoundtrack === 'function') {
+                        generateSoundtrack(audioContext, currentIdx);
+                    }
+                }
+            }
+            
+            console.log('Audio muted:', isMuted);
+        });
+    }
+    
+    // Detect embed mode from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    window.embedMode = urlParams.has('embed');
+    
+    // Listen for postMessage commands (for builder/embed mode)
+    window.addEventListener('message', (event) => {
+        // Security: In production, check event.origin
+        if (event.data && event.data.action === 'loadLevel') {
+            const config = event.data.config;
+            if (config) {
+                console.log('Loading level from builder:', config.name);
+                startLevelFromConfig(config);
+            }
+        } else if (event.data && event.data.action === 'stopLevel') {
+            isRunning = false;
+            clearInterval(timer);
+        }
+    });
+    
+    // If in embed mode, hide UI elements and wait for postMessage
+    if (window.embedMode) {
+        console.log('Game running in embed mode - waiting for level config');
+        const overlay = document.getElementById('overlay');
+        if (overlay) overlay.classList.add('hidden');
+    }
 });
 window.addEventListener('resize', handleResize);
 window.addEventListener('touchstart', e => handleInteraction(e.touches[0].clientX, e.touches[0].clientY));

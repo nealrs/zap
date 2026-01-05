@@ -33,6 +33,10 @@ app.get('/dev/:level', (req, res) => {
     if (ENV !== 'dev') {
         return res.status(404).send('Not found');
     }
+    // Handle builder route specifically
+    if (req.params.level === 'builder') {
+        return res.sendFile(join(__dirname, 'app', 'builder.html'));
+    }
     // Redirect to dev selector with level parameter
     res.redirect(`/dev?level=${req.params.level}`);
 });
