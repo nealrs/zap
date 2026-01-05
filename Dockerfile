@@ -7,16 +7,21 @@ WORKDIR /app
 
 # Build argument for git branch
 ARG GIT_BRANCH=main
+ARG USE_GIT=false
 
-# Clone or copy repository
-# If building from local context, this will copy local files
-# For production builds from git, replace COPY with git clone
+# Either clone from git or copy local files
+RUN if [ "$USE_GIT" = "true" ]; then \
+        echo "Cloning from git branch: $GIT_BRANCH" && \
+        git clone --depth 1 --branch $GIT_BRANCH https://github.com/nealrs/zap.git . && \
+        npm install --production; \
+    else \
+        echo "Using local files"; \
+    fi
+
+# Copy local files (only if not using git)
 COPY package*.json ./
+RUN if [ "$USE_GIT" = "false" ]; then npm install --production; fi
 
-# Install dependencies
-RUN npm install --production
-
-# Copy application files
 COPY . .
 
 # Expose port

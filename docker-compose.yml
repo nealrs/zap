@@ -5,6 +5,7 @@ services:
       context: .
       args:
         - GIT_BRANCH=main
+        - USE_GIT=true  # Production builds from GitHub main branch
     ports:
       - "1337:3000"
     environment:
@@ -20,6 +21,7 @@ services:
       context: .
       args:
         - GIT_BRANCH=dev
+        - USE_GIT=false  # Development builds from local files
     ports:
       - "1338:3000"
     environment:

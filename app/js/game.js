@@ -1238,7 +1238,8 @@ function handleInteraction(x, y) {
         // ...add more effects as needed...
         
         // Check for level completion after special bubble effects
-        if(score >= levels[currentIdx].target) {
+        const lvl = window.currentLevelConfig || levels[currentIdx];
+        if(lvl && score >= lvl.target) {
             endGame(true);
         }
         
@@ -1299,12 +1300,12 @@ function handleInteraction(x, y) {
         }
         
         // Check for level completion
-        if(score >= levels[currentIdx].target) {
+        const lvl = window.currentLevelConfig || levels[currentIdx];
+        if(lvl && score >= lvl.target) {
             endGame(true);
         }
         
         // Spawn new bubble if respawn is enabled and target not yet reached
-        const lvl = window.currentLevelConfig || levels[currentIdx];
         if (lvl && lvl.respawnBubbles && score < lvl.target) {
             spawnBubbleInScene(lvl, scene, bubbles, bubbleNormalMap);
         }
@@ -1385,7 +1386,8 @@ function checkPendingClicks() {
                     createFloatingText(bubble.position, `${def.effect.durationSeconds}s MAGNET`, '#ff6600');
                 }
                 
-                if(score >= levels[currentIdx].target) {
+                const lvl = window.currentLevelConfig || levels[currentIdx];
+                if(lvl && score >= lvl.target) {
                     endGame(true);
                 }
                 
@@ -1422,11 +1424,11 @@ function checkPendingClicks() {
                     navigator.vibrate([50, 30, 100]);
                 }
                 
-                if(score >= levels[currentIdx].target) {
+                const lvl = window.currentLevelConfig || levels[currentIdx];
+                if(lvl && score >= lvl.target) {
                     endGame(true);
                 }
                 
-                const lvl = window.currentLevelConfig || levels[currentIdx];
                 if (lvl && lvl.respawnBubbles && score < lvl.target) {
                     spawnBubbleInScene(lvl, scene, bubbles, bubbleNormalMap);
                 }

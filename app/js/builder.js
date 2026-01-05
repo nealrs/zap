@@ -848,17 +848,10 @@ function buildLevelConfig() {
 }
 
 function validateLevel(config) {
-    // Check hazard count and types
+    // Check hazard count
     if (config.hazards.length > 2) {
         alert('Maximum 2 hazards allowed');
         return false;
-    }
-    
-    if (config.hazards.length === 2) {
-        if (config.hazards[0].type !== config.hazards[1].type) {
-            alert('If using 2 hazards, they must be the same type');
-            return false;
-        }
     }
     
     // Check special bubble types

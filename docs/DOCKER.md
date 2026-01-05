@@ -2,15 +2,25 @@
 
 ## Branch Configuration
 
-The Docker Compose setup uses different git branches for different environments:
-- **Production (`zap-prod`)**: Builds from `main` branch (port 1337)
-- **Development (`zap-dev`)**: Builds from `dev` branch (port 1338)
+The Docker Compose setup uses different modes for each environment:
+
+- **Development (`zap-dev`)**: Builds from **local files** (port 1338)
+  - Fast rebuilds for development
+  - Uses your current branch
+  - Hot reload enabled via volumes
+
+- **Production (`zap-prod`)**: Builds from **GitHub main branch** (port 1337)
+  - Always pulls latest from main
+  - Clean build from git
+  - Production-ready deployment
 
 ## Development with Hot Reload
 
-Run in development mode with hot reload (changes to files are reflected immediately):
+Run in development mode (builds from your local files):
 
 ```bash
+# No need to switch branches - uses current local files
+docker-compose build --no-cache zap-dev
 docker-compose up zap-dev
 ```
 
@@ -18,19 +28,13 @@ Access at: http://localhost:1338
 
 Changes to any files in the `/app` directory (HTML, CSS, JS, JSON) will be automatically reflected without rebuilding the container.
 
-**Note**: The dev service builds from the `dev` branch. Make sure to create and push the `dev` branch first:
-
-```bash
-# Create and push dev branch
-git checkout -b dev
-git push -u origin dev
-```
-
 ## Production
 
-Run in production mode (with service worker enabled):
+Run in production mode (clones from GitHub main branch):
 
 ```bash
+# Automatically clones from GitHub main - no local branch needed
+docker-compose build --no-cache zap-prod
 docker-compose up zap-prod
 ```
 
