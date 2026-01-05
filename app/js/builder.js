@@ -113,7 +113,7 @@ function loadExistingLevel(index) {
     document.getElementById('size').value = level.size;
     document.getElementById('gravity').value = level.gravity;
     document.getElementById('spawn-radius').value = level.spawnRadius;
-    document.getElementById('camera-zoom').value = level.cameraZoom || 40;
+    document.getElementById('camera-zoom').value = level.cameraZoom || 60;
     document.getElementById('auto-rotate').checked = level.autoRotate !== undefined ? level.autoRotate : true;
     document.getElementById('color').value = level.color.replace('0x', '#');
     document.getElementById('respawn-bubbles').checked = level.respawnBubbles || false;
@@ -127,7 +127,7 @@ function loadExistingLevel(index) {
     updateSliderValue('size', level.size);
     updateSliderValue('gravity', level.gravity);
     updateSliderValue('spawn-radius', level.spawnRadius);
-    updateSliderValue('camera-zoom', level.cameraZoom || 40);
+    updateSliderValue('camera-zoom', level.cameraZoom || 60);
     updateSliderValue('respawn-rate', level.respawnRate || 0);
     
     // Clear and reload hazards
@@ -219,7 +219,7 @@ function applyJsonToUI() {
         document.getElementById('size').value = config.size || 1.2;
         document.getElementById('gravity').value = config.gravity || 0.00008;
         document.getElementById('spawn-radius').value = config.spawnRadius || 8;
-        document.getElementById('camera-zoom').value = config.cameraZoom || 40;
+        document.getElementById('camera-zoom').value = config.cameraZoom || 60;
         document.getElementById('auto-rotate').checked = config.autoRotate !== undefined ? config.autoRotate : true;
         document.getElementById('color').value = (config.color || '0xffff00').replace('0x', '#');
         document.getElementById('respawn-bubbles').checked = config.respawnBubbles || false;
@@ -236,7 +236,7 @@ function applyJsonToUI() {
         updateSliderValue('size', config.size || 1.2);
         updateSliderValue('gravity', config.gravity || 0.00008);
         updateSliderValue('spawn-radius', config.spawnRadius || 8);
-        updateSliderValue('camera-zoom', config.cameraZoom || 40);
+        updateSliderValue('camera-zoom', config.cameraZoom || 60);
         updateSliderValue('respawn-rate', config.respawnRate || 0);
         
         // Clear and reload hazards

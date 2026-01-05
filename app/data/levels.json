@@ -11,7 +11,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [],
     "specialBubbles": {
       "enabled": false
@@ -29,7 +29,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "comet",
@@ -55,7 +55,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "wormhole",
@@ -80,7 +80,7 @@
     "respawnBubbles": false,
     "respawnRate": 0,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "wormhole",
@@ -100,6 +100,24 @@
     }
   },
   {
+    "name": "🎉 Bubble Wrap Bliss",
+    "desc": "Bonus level! No hazards, just pure bubble-popping fun. Go nuts!",
+    "target": 20,
+    "time": 60,
+    "count": 20,
+    "size": 1.0,
+    "gravity": 0.0001,
+    "color": "0x00ffff",
+    "respawnBubbles": true,
+    "respawnRate": 5,
+    "spawnRadius": 15,
+    "cameraZoom": 60,
+    "hazards": [],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
     "name": "The Repulsor Core",
     "desc": "A repulsor pushes everything away. Hunt the fleeing bubbles!",
     "target": 30,
@@ -111,7 +129,7 @@
     "respawnBubbles": true,
     "respawnRate": 3,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "repulsor",
@@ -136,7 +154,7 @@
     "respawnBubbles": true,
     "respawnRate": 4,
     "spawnRadius": 10,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "pulsar",
@@ -164,7 +182,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "wormhole",
@@ -191,7 +209,7 @@
     "respawnBubbles": true,
     "respawnRate": 1,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "repulsor",
@@ -207,6 +225,24 @@
     }
   },
   {
+    "name": "🎊 Bubble Paradise",
+    "desc": "Bonus level! More bubbles, more fun. Just keep popping!",
+    "target": 30,
+    "time": 60,
+    "count": 25,
+    "size": 1.0,
+    "gravity": 0.0001,
+    "color": "0xff00ff",
+    "respawnBubbles": true,
+    "respawnRate": 5,
+    "spawnRadius": 15,
+    "cameraZoom": 60,
+    "hazards": [],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
     "name": "Comet Storm",
     "desc": "Multiple comets trail through space. Use slow motion to navigate!",
     "target": 42,
@@ -218,7 +254,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "comet",
@@ -253,7 +289,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 8,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "repulsor",
@@ -280,7 +316,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 9,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "pulsar",
@@ -308,7 +344,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 11,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "wormhole",
@@ -320,7 +356,25 @@
     "specialBubbles": {
       "enabled": true,
       "types": ["magnetize"],
-      "spawnIntervalSeconds": 8
+      "spawnIntervalSeconds": 8.5
+    }
+  },
+  {
+    "name": "🎈 Bubble Bonanza",
+    "desc": "Bonus level! Even more bubbles to pop. Pure satisfaction!",
+    "target": 40,
+    "time": 60,
+    "count": 30,
+    "size": 1.0,
+    "gravity": 0.0001,
+    "color": "0xffff00",
+    "respawnBubbles": true,
+    "respawnRate": 5,
+    "spawnRadius": 15,
+    "cameraZoom": 60,
+    "hazards": [],
+    "specialBubbles": {
+      "enabled": false
     }
   },
   {
@@ -335,7 +389,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 9,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "repulsor",
@@ -368,7 +422,7 @@
     "respawnBubbles": true,
     "respawnRate": 1,
     "spawnRadius": 10,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "comet",
@@ -396,7 +450,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 7,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "wormhole",
@@ -423,7 +477,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 10,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "pulsar",
@@ -447,6 +501,24 @@
     }
   },
   {
+    "name": "🌟 Bubble Euphoria",
+    "desc": "Bonus level! Maximum bubbles, maximum fun. You've earned this!",
+    "target": 50,
+    "time": 60,
+    "count": 35,
+    "size": 1.0,
+    "gravity": 0.0001,
+    "color": "0x00ff00",
+    "respawnBubbles": true,
+    "respawnRate": 5,
+    "spawnRadius": 15,
+    "cameraZoom": 60,
+    "hazards": [],
+    "specialBubbles": {
+      "enabled": false
+    }
+  },
+  {
     "name": "Repulsor Storm",
     "desc": "Fast respawns with a powerful repulsor. Chain multipops!",
     "target": 38,
@@ -458,7 +530,7 @@
     "respawnBubbles": true,
     "respawnRate": 1,
     "spawnRadius": 9,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "repulsor",
@@ -485,7 +557,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 11,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "comet",
@@ -520,7 +592,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 12,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "wormhole",
@@ -553,7 +625,7 @@
     "respawnBubbles": true,
     "respawnRate": 2,
     "spawnRadius": 12,
-    "cameraZoom": 40,
+    "cameraZoom": 60,
     "hazards": [
       {
         "type": "pulsar",
@@ -574,6 +646,24 @@
       "enabled": true,
       "types": ["multipop", "slowmo"],
       "spawnIntervalSeconds": 12
+    }
+  },
+  {
+    "name": "💫 Bubble Nirvana",
+    "desc": "Ultimate bonus level! You've mastered the game. Celebrate with maximum bubble bliss!",
+    "target": 55,
+    "time": 60,
+    "count": 40,
+    "size": 1.0,
+    "gravity": 0.0001,
+    "color": "0xff69b4",
+    "respawnBubbles": true,
+    "respawnRate": 5,
+    "spawnRadius": 15,
+    "cameraZoom": 60,
+    "hazards": [],
+    "specialBubbles": {
+      "enabled": false
     }
   }
 ]
