@@ -542,7 +542,7 @@ function initScene() {
     // minDistance: prevent bubbles from exceeding 10% of screen
     // maxDistance: ensure bubbles stay large enough to click (min 40px on screen)
     controls.minDistance = 8;   // Closest zoom - bubbles ~8-10% of screen
-    controls.maxDistance = 50;  // Farthest zoom - bubbles still ~2-3% of screen (clickable)
+    controls.maxDistance = 60;  // Farthest zoom - allow full zoom out (levels start at 60)
     
     controls.mouseButtons = {
         LEFT: THREE.MOUSE.ROTATE,

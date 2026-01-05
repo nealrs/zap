@@ -190,3 +190,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchstart', initOnInteraction, { once: true });
     document.addEventListener('click', initOnInteraction, { once: true });
 });
+
+// Pause audio when page is hidden (user switches tabs/apps)
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // Page is hidden - pause all audio
+        if (AudioManager.currentSoundtrack) {
+            AudioManager.currentSoundtrack.pause();
+            AudioManager.wasPlayingBeforeHidden = true;
+        }
+    } else {
+        // Page is visible again - resume if it was playing
+        if (AudioManager.wasPlayingBeforeHidden && AudioManager.currentSoundtrack) {
+            AudioManager.currentSoundtrack.play().catch(err => {
+                console.log('Could not resume audio:', err);
+            });
+            AudioManager.wasPlayingBeforeHidden = false;
+        }
+    }
+});
