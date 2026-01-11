@@ -111,6 +111,19 @@ See `docs/LEVELS-GUIDE.md` for detailed level design documentation.
 - `npm run generate-audio` - Render audio from soundtrack.js
 - `npm run publish <version>` - Update version across all files
 
+### Testing
+- `npm run test` - Test all levels in production mode (same as `test:levels`)
+- `npm run test:levels` - Test all levels in production mode
+- `npm run test:quick` - Test first 5 levels (quick validation)
+- `npm run test:single -- --level=7` - Test a single level
+- `npm run test:all-viewports` - Test all levels across mobile/tablet/desktop
+- `npm run test:dev` - Test in dev mode (level selector)
+- `npm run test:dev:quick` - Quick test in dev mode
+
+**Note**: Tests run in headless mode by default (no visible browser). Use `--headless=false` to see the browser window.
+
+Test reports are saved to `.test-results/` (Markdown + JSON). See [Developer Guide](docs/DEVELOPER.md#testing) for details.
+
 ## Audio Generation
 
 Audio files are pre-rendered for optimal performance:

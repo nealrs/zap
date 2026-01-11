@@ -797,6 +797,14 @@ function startLevel(idx) {
         return;
     }
     
+    // Reset FPS tracking on level start
+    if (window.gameStats) {
+        window.gameStats.frameCount = 0;
+        window.gameStats.lastFPSUpdate = performance.now();
+        window.gameStats.fps = 60;
+        window.gameStats.frameTimes = [];
+    }
+    
     // Initialize audio context on first level start
     initAudio();
     
@@ -1446,6 +1454,31 @@ function checkPendingClicks() {
  */
 function animate() {
     requestAnimationFrame(animate);
+    
+    // FPS tracking (for testing, not visible to players)
+    if (!window.gameStats) {
+        window.gameStats = {
+            frameCount: 0,
+            lastFPSUpdate: performance.now(),
+            fps: 60, // Default
+            frameTimes: []
+        };
+    }
+    
+    // Update FPS tracking
+    const now = performance.now();
+    window.gameStats.frameCount++;
+    window.gameStats.frameTimes.push(now);
+    
+    // Calculate FPS every second
+    if (now - window.gameStats.lastFPSUpdate >= 1000) {
+        const framesInSecond = window.gameStats.frameTimes.filter(t => now - t <= 1000).length;
+        window.gameStats.fps = framesInSecond;
+        window.gameStats.lastFPSUpdate = now;
+        // Keep only recent frame times (last 2 seconds)
+        window.gameStats.frameTimes = window.gameStats.frameTimes.filter(t => now - t <= 2000);
+    }
+    
     if (typeof controls !== 'undefined' && controls) {
         // Apply pulsar rotation effects
         if (isRunning) {

@@ -15,10 +15,11 @@
 7. [Physics System](#physics-system)
 8. [Audio & Feedback](#audio--feedback)
 9. [PWA Setup](#pwa-setup)
-10. [Deployment Guide](#deployment-guide)
-11. [Troubleshooting](#troubleshooting)
-12. [Examples & Recipes](#examples--recipes)
-13. [Quick Reference](#quick-reference)
+10. [Testing](#testing)
+11. [Deployment Guide](#deployment-guide)
+12. [Troubleshooting](#troubleshooting)
+13. [Examples & Recipes](#examples--recipes)
+14. [Quick Reference](#quick-reference)
 
 ---
 
@@ -805,6 +806,189 @@ self.addEventListener('fetch', (e) => {
 2. Build: none (static site)
 3. Publish: `/`
 4. Instant deployment with HTTPS
+
+## Testing
+
+The project includes an automated test suite that validates all levels, checks for gameplay issues, and generates detailed reports.
+
+### Quick Start
+
+```bash
+# Test all levels (production mode)
+npm run test:levels
+
+# Quick test (first 5 levels only)
+npm run test:quick
+
+# Test a specific level
+npm run test:single -- --level=7
+
+# Test across all viewports (mobile/tablet/desktop)
+npm run test:all-viewports
+```
+
+### Test Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run test` | Test all levels in production mode (same as `test:levels`) |
+| `npm run test:levels` | Test all levels in production mode (default) |
+| `npm run test:quick` | Test first 5 levels for quick validation |
+| `npm run test:single -- --level=N` | Test a single level (1-indexed) |
+| `npm run test:all-viewports` | Test all levels across multiple screen sizes |
+| `npm run test:quick-all` | Quick test across all viewports |
+| `npm run test:dev` | Test in dev mode (level selector) |
+| `npm run test:dev:quick` | Quick test in dev mode |
+
+**Note**: All tests run in **headless mode by default** (no visible browser window). This is faster and suitable for automated testing. To see the browser window, add `--headless=false` to any command.
+
+### Command Line Flags
+
+All test commands support these flags:
+
+- `--quick` - Test only first 5 levels
+- `--level=N` - Test a specific level (1-indexed, e.g., `--level=7`)
+- `--all-viewports` - Test across mobile, tablet, and desktop viewports
+- `--dev` - Test in dev mode (`/dev.html`) instead of production (`/index.html`)
+- `--headless=false` - Run with visible browser (useful for debugging)
+
+**Default Behavior**: Tests run in **headless mode** (no visible browser) by default. This is faster and suitable for automated testing. To see the browser window during testing, add `--headless=false` to any command.
+
+**Examples:**
+
+```bash
+# Test level 7 with visible browser
+npm run test:single -- --level=7 --headless=false
+
+# Quick test in dev mode
+npm run test:dev:quick
+
+# Test all levels across all viewports
+npm run test:all-viewports
+```
+
+### Test Output
+
+Tests generate two types of reports in `.test-results/`:
+
+1. **Markdown Report** (`test-report-{timestamp}.md`)
+   - Human-readable summary
+   - Pass/fail status for each level
+   - Metrics (FPS, memory, bubbles, audio)
+   - Screenshots
+   - Warnings and errors with fix instructions
+
+2. **JSON Report** (`test-report-{timestamp}.json`)
+   - Machine-readable data
+   - Full metrics and test results
+   - Suitable for CI/CD integration
+
+### What Gets Tested
+
+The test suite validates:
+
+- ✅ **Level Loading**: All levels load without errors
+- ✅ **Gameplay**: Levels are playable (bubbles spawn, can be clicked)
+- ✅ **Performance**: FPS tracking (<30 critical, 30-45 warning, 45+ acceptable)
+- ✅ **Memory**: Memory leak detection (>10MB delta per level)
+- ✅ **Audio**: Soundtrack and sound effects playback
+- ✅ **JSON Validation**: Level configuration validation
+- ✅ **Sanity Checks**: Impossible levels (target > count without respawn, etc.)
+- ✅ **Special Bubbles**: Spawn validation (only if enabled)
+- ✅ **Hazards**: Comet limit enforcement (max 1 per level)
+- ✅ **Screenshots**: 2-3 gameplay screenshots per level
+
+### Test Configuration
+
+Test configuration is in `test-config.json`:
+
+```json
+{
+  "serverPort": 3001,
+  "baseUrl": "http://localhost:3001",
+  "timeout": 30000,
+  "headless": true,
+  "screenshotDir": ".test-results/screenshots",
+  "reportDir": ".test-results",
+  "defaultViewports": ["iphone-portrait"],
+  "allViewports": ["iphone-portrait", "tablet-portrait", "desktop-narrow"]
+}
+```
+
+### Understanding Test Reports
+
+**Summary Section:**
+- Total levels tested
+- Passed/Failed counts
+- Warning count
+
+**What's Broken:**
+- Failed levels with error messages
+- Fix instructions for common issues
+
+**What Works:**
+- List of all passing levels
+
+**Detailed Level Results:**
+- Status (Passed/Failed)
+- Load time and gameplay duration
+- State transitions (start → gameplay → win/lose)
+- Metrics (FPS, memory, bubbles, audio)
+- Screenshots
+- Warnings and errors
+
+**Common Issues Detected:**
+- **Critical Issues**: Levels that fail to start
+- **Performance Issues**: Low FPS warnings
+- **Audio Issues**: Soundtrack/sound effects problems
+- **Gameplay Issues**: No bubbles spawned, special bubbles not spawning
+- **Memory Issues**: Potential memory leaks
+
+### Troubleshooting Tests
+
+**Server won't start:**
+```bash
+# Check if port 3001 is in use
+lsof -i :3001
+
+# Kill existing process
+kill -9 <PID>
+```
+
+**Tests timeout:**
+- Increase `timeout` in `test-config.json`
+- Check if server is running
+- Verify network connectivity
+
+**Screenshots not saving:**
+- Check directory permissions
+- Ensure `.test-results/screenshots/` directory exists
+
+**Level fails "impossible to play":**
+- Check if bubbles are actually visible
+- Verify bubble size isn't too small
+- Check if target is achievable (consider respawn if enabled)
+- Run with `--headless=false` to visually inspect
+
+### Pre-commit Hook (Optional)
+
+To run quick tests before each commit, create `.git/hooks/pre-commit`:
+
+```bash
+#!/bin/sh
+echo "Running quick tests before commit..."
+npm run test:quick
+
+if [ $? -ne 0 ]; then
+  echo "Quick tests failed. Aborting commit."
+  exit 1
+fi
+```
+
+Make it executable:
+```bash
+chmod +x .git/hooks/pre-commit
+```
 
 ### Local Testing
 

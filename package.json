@@ -9,7 +9,15 @@
     "dev": "ENV=dev node --watch server.js",
     "generate-icons": "./tools/generate-icons.sh",
     "generate-audio": "node tools/generate-audio-headless.js",
-    "publish": "node scripts/publish.js"
+    "publish": "node scripts/publish.js",
+    "test": "node scripts/test-levels.js",
+    "test:levels": "node scripts/test-levels.js",
+    "test:quick": "node scripts/test-levels.js --quick",
+    "test:single": "node scripts/test-levels.js",
+    "test:all-viewports": "node scripts/test-levels.js --all-viewports",
+    "test:quick-all": "node scripts/test-levels.js --quick --all-viewports",
+    "test:dev": "node scripts/test-levels.js --dev",
+    "test:dev:quick": "node scripts/test-levels.js --dev --quick"
   },
   "dependencies": {
     "express": "^4.18.2"

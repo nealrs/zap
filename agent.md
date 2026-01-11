@@ -48,9 +48,21 @@ zap/
 │   ├── builder.html            # Level builder tool
 │   └── dev.html                # Dev level selector
 ├── docs/                       # Documentation
+├── plans/                      # Product specs & development ideas
+│   ├── PR0_test_env_setup.md  # Test environment setup plan
+│   └── PRs.md                  # Organized PR specifications
 ├── tools/                      # Build scripts
 └── scripts/                    # Automation scripts
 ```
+
+### Plans Folder
+
+The `/plans` folder contains product specifications and development ideas:
+
+- **`PRs.md`**: Organized PR specifications with tasks, acceptance criteria, and agent assignments
+- **`PR0_test_env_setup.md`**: Detailed implementation plan for the test environment setup
+
+These documents serve as the source of truth for development priorities and implementation details.
 
 ### Shared Module Architecture
 
@@ -987,6 +999,135 @@ game is deployed to zap.neal.rs via docker/local machine / r53 routing
 - [ ] Mobile-friendly
 - [ ] Performance optimized
 - [ ] Memory properly cleaned up
+
+---
+
+## Testing Insights & Gotchas
+
+**Critical Lessons Learned During Test Development** - These insights should inform any future testing or game development work:
+
+### Game Mechanics That Affect Testing
+
+1. **Special Bubble Spawn Timing**
+   - Special bubbles **don't spawn until 10 seconds** into gameplay (`elapsedTime >= 10` in `game.js`)
+   - After 10s, they spawn at intervals (default: every 5 seconds, configurable via `spawnIntervalSeconds`)
+   - **Implication**: Tests must run **at least 20-25 seconds** to detect special bubbles spawning
+   - Levels with special bubbles enabled need extended test duration (see `test-levels.js`)
+
+2. **Respawn Mechanics & Validation**
+   - Levels with `respawnBubbles: true` can have `target > count` (initially)
+   - Respawn rate (`respawnRate`) determines how many bubbles spawn during gameplay
+   - **Implication**: Level validation must check `respawnBubbles` before flagging `target > count` as impossible
+   - Always calculate: `totalPossibleBubbles = count + (time * respawnRate)`
+
+3. **Test Completion Timing**
+   - Automated tests click bubbles actively, so levels may complete **earlier than expected** (~17 seconds instead of full 60s)
+   - This is normal behavior - tests validate playability, not full level duration
+   - Screenshot timing (3s, 8s, 15s) may not capture full gameplay - adjust for special bubbles
+
+4. **Level Completion Detection**
+   - Tests detect win/lose via overlay content (`#overlay` element)
+   - Win screen contains "Level Complete" or "You Win"
+   - Lose screen contains "Time's Up" or "Failed"
+   - Level may complete while tests are still running screenshots
+
+### Test Defaults & Configuration
+
+5. **Headless Mode Default**
+   - All tests run in **headless mode by default** (no visible browser)
+   - Use `--headless=false` to see browser for debugging
+   - Audio **may** work in headless with `--autoplay-policy=no-user-gesture-required` flag
+   - Audio warnings vs errors: In headless, audio issues are warnings, not errors
+
+6. **Production vs Dev Mode**
+   - Tests default to **production mode** (`index.html`), not dev mode (`/dev.html`)
+   - Use `--dev` flag to test in dev mode (level selector)
+   - Production mode requires `localStorage.setItem('maxUnlockedLevel', '999')` to unlock all levels
+
+7. **Viewport Defaults**
+   - Default viewport: **mobile** (`iphone-portrait` - 375x667)
+   - Use `--all-viewports` to test across mobile/tablet/desktop
+   - Mobile-first testing aligns with game's primary platform
+
+### Validation & Sanity Checks
+
+8. **Level Configuration Validation**
+   - Must validate **value ranges**, not just syntax and required fields
+   - Check: time > 0, target > 0, count > 0, size in reasonable range (0.5-3)
+   - Comet limit: Max 1 per level (PR-8 requirement)
+   - **Always consider respawn** when checking `target > count` - it's not always impossible!
+
+9. **Special Bubble Validation**
+   - Only flag missing special bubbles if `specialBubbles.enabled === true`
+   - Must wait 20-25 seconds before checking if special bubbles spawned
+   - Check spawn interval (`spawnIntervalSeconds`) - default is 5 seconds after 10s delay
+
+10. **Impossible Level Detection**
+    - Use **100 random clicks** (not 30) to test pop rate
+    - Zero pop rate after 100 clicks = impossible level
+    - Low pop rate (<2%) for high-target levels (target >= 20) = impossible level
+    - Consider respawn when calculating if target is achievable
+
+### Screenshot Strategy
+
+11. **Screenshot Timing**
+    - Normal levels: Screenshots at 3s, 8s, 15s
+    - Levels with special bubbles: Extended to 3s, 8s, 15s, 20s, 25s (plus 2s extra wait)
+    - Always verify gameplay state before capturing (check overlay is hidden)
+
+12. **Failure Screenshots**
+    - **Critical**: Take failure screenshots **BEFORE** throwing errors, not in catch blocks
+    - Catch blocks may run after page has navigated away
+    - Check if page is still on level page before capturing failure screenshot
+    - Avoid duplicate screenshots - check if failure screenshot already exists
+
+### Error Handling & Reporting
+
+13. **Early Stopping**
+    - Stop test suite if **3+ failures of same type** occur
+    - Indicates systemic issue affecting multiple levels
+    - Continue testing if failures are different types (get full picture)
+
+14. **Error Categorization**
+    - Categorize errors by type for better reporting
+    - Common types: "Bubble Spawning Issue", "Game Start Issue", "Low FPS", "Memory Leak", "Impossible Level"
+    - Provides actionable fix instructions based on error type
+
+15. **Actionable Fix Instructions**
+    - Reports should include step-by-step fix instructions for common errors
+    - Instructions should reference specific files and functions
+    - Include diagnostic commands (e.g., `npm run test:single -- --level=X --headless=false`)
+
+### Performance & Metrics
+
+16. **FPS Tracking**
+    - FPS tracking is built into `game.js` via `window.gameStats.fps`
+    - Tracked during `animate()` loop
+    - Reset on level start in `startLevel()`
+    - Thresholds: <30 Critical, 30-45 Warning, 45-55 Acceptable, 55+ Good
+
+17. **Memory Tracking**
+    - Monitor JavaScript heap size via Puppeteer `page.metrics()`
+    - Calculate delta: `memoryDeltaMB = (memoryEnd - memoryStart) / (1024 * 1024)`
+    - Flag if >10MB per level (potential memory leak)
+
+18. **State Transitions**
+    - Track: Start → Gameplay → Win/Lose with timestamps
+    - Helps debug timing issues and UI transitions
+    - Useful for detecting choppy transitions (PR-5)
+
+### JSON Validation Best Practices
+
+19. **Enhanced Validation**
+    - Don't just check syntax and required fields
+    - Validate value ranges (time, target, count, size, gravity)
+    - Flag suspicious configurations (target > count without respawn, time too short for target)
+    - Warn about design issues (very small bubbles, negative gravity, etc.)
+
+20. **Context-Aware Validation**
+    - Consider game mechanics when validating (respawn, special bubbles)
+    - Sanity checks should understand gameplay context
+    - Some warnings vs errors distinction (design issues = warnings, invalid data = errors)
 
 ---
 
