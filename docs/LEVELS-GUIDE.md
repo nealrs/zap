@@ -1,6 +1,8 @@
-# Bubble Zap 3D - 10 Level Progression Guide
+# Bubble Zap 3D - 20 Level Progression Guide
 
 ## Level Progression Overview
+
+**Note**: All levels are set to maximum camera zoom (40) by default, giving the widest view possible. This ensures players can see all bubbles and won't lose any off-screen. Camera zoom can be adjusted per-level as needed.
 
 ### Tutorial Levels (1-3) - Learn the Basics
 **Goal**: Introduce core mechanics with no obstacles
@@ -245,11 +247,22 @@ Difficulty:
 
 ## Constraints Met
 
-✅ **No level longer than 60s**: Max is Level 10 at 60s exactly  
-✅ **No level requires more than 50 pops**: Max is Level 10 at 45 pops  
-✅ **Max 2 hazards per level**: Only Level 4 has 2 (both wormholes)  
+✅ **No level longer than 60s**: Max is Level 10/20 at 60s exactly  
+✅ **No level requires more than 45 pops**: Max is Level 10/18/20 at 45 pops  
+✅ **Max 2 hazards per level**: Only certain levels have 2 (same type)  
 ✅ **Max 1 hazard type per level**: All levels single type or none  
-✅ **Max 1 special bubble type per level**: All levels have 0 or 1 type  
+✅ **Max 2 special bubble types per level**: Levels 11-20 have 1-2 types  
+✅ **All levels set to cameraZoom: 40**: Maximum zoom out for widest view
+
+---
+
+## Camera Zoom Configuration
+
+All levels use `cameraZoom: 40` (maximum zoom) by default:
+- **Higher value (40)** = Widest view, all bubbles visible
+- **Lower value (10-25)** = Closer view, more focus but risk losing bubbles off-screen
+- Players can rotate camera in-game but zoom level is fixed per level
+- Adjust zoom manually after playtesting individual levels
 
 ---
 

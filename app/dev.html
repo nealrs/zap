@@ -62,6 +62,50 @@
             letter-spacing: 0.1em;
         }
 
+        .dev-tools {
+            margin: 30px auto 40px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            max-width: 600px;
+        }
+
+        .dev-tools h2 {
+            color: #4facfe;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .dev-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dev-links a {
+            color: #4facfe;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 15px;
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dev-links a:hover {
+            background: rgba(79, 172, 254, 0.2);
+            transform: translateX(5px);
+        }
+
+        .dev-links a .icon {
+            font-size: 20px;
+        }
+
         .level-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -134,21 +178,26 @@
 <body>
     <div class="container">
         <h1>DEV MODE</h1>
-        <div class="subtitle">Developer Testing</div>
-        <div class="dev-badge">⚠️ DEVELOPER ACCESS ⚠️</div>
         
-        <div style="margin-bottom: 20px;">
-            <button id="finale-test-btn" onclick="window.location.href='/dev/finale'">
-                ⭐ TEST FINALE SCREEN
-            </button>
+        <div class="dev-tools">
+            <h2>🛠 Developer Tools</h2>
+            <div class="dev-links">
+                <a href="/dev/builder">
+                    <span class="icon">🎮</span>
+                    <span>Level Builder - Create and export custom levels</span>
+                </a>
+                <a href="/dev/finale">
+                    <span class="icon">⭐</span>
+                    <span>Finale Screen Test - Preview victory animation</span>
+                </a>
+                <a href="/dev/audio.html">
+                    <span class="icon">🎵</span>
+                    <span>Audio Test - Test soundtrack generation</span>
+                </a>
+            </div>
         </div>
         
-        <div style="margin-bottom: 20px;">
-            <button id="finale-test-btn" onclick="window.location.href='/dev/audio.html'" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); border-color: rgba(96, 165, 250, 0.5);">
-                🎵 AUDIO TEST
-            </button>
-        </div>
-        
+        <h2 style="color: #ff6b6b; margin-bottom: 20px;">Select Level to Test</h2>
         <div id="level-grid" class="level-grid">
             <!-- Levels will be populated here -->
         </div>

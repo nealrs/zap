@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BubbleZap 3D - Level Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #0a0a1e;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Config Panel - Left Side */
+        #config-panel {
+            width: 400px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
+            border-right: 2px solid #4facfe;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        #config-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #config-panel::-webkit-scrollbar-track {
+            background: #0a0a1e;
+        }
+
+        #config-panel::-webkit-scrollbar-thumb {
+            background: #4facfe;
+            border-radius: 4px;
+        }
+
+        h1 {
+            font-size: 24px;
+            background: linear-gradient(45deg, #00f260, #0575e6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            background: rgba(79, 172, 254, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(79, 172, 254, 0.2);
+        }
+
+        .section h2 {
+            font-size: 16px;
+            color: #4facfe;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            background: #0a0a1e;
+            border: 1px solid #4facfe;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, #4facfe 0%, #4facfe 100%);
+            background-size: 100% 2px;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid #4facfe;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px;
+            background: transparent;
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 6px;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4facfe;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #00f260;
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #4facfe;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #00f260;
+            transform: scale(1.2);
+        }
+
+        label span {
+            color: #4facfe;
+            font-weight: bold;
+        }
+
+        input[type="color"] {
+            width: 60px;
+            height: 35px;
+            border: 1px solid #4facfe;
+            background: #0a0a1e;
+            cursor: pointer;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .inline-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .inline-group label {
+            margin-bottom: 0;
+        }
+
+        /* Hazard & Special Bubble Lists */
+        .hazard-item, .special-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+        }
+
+        .hazard-header, .special-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .hazard-header h3, .special-header h3 {
+            font-size: 14px;
+            color: #ffeb3b;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #4facfe;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #00f260;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #ff4b2b;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #ff0000;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .btn-block {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-buttons .btn {
+            flex: 1;
+        }
+
+        .warning {
+            color: #ff6600;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        /* Play Area - Right Side */
+        #play-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%);
+            position: relative;
+        }
+
+        #game-container {
+            width: 375px;
+            height: 667px;
+            border: 4px solid #4facfe;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+            box-shadow: 0 0 40px rgba(79, 172, 254, 0.4);
+        }
+
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: none; /* Hidden - using iframe instead */
+        }
+        
+        #game-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        #game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #play-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #play-controls .btn {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .status {
+            text-align: center;
+            color: #4facfe;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .victory-banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #00f260 0%, #0575e6 100%);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 16px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0, 242, 96, 0.6);
+            animation: victoryPulse 1s ease-in-out infinite;
+            display: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .victory-banner:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .victory-banner.show {
+            display: block;
+        }
+
+        .victory-banner .emoji {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .victory-banner .message {
+            margin-bottom: 20px;
+        }
+
+        .victory-banner .prompt {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        @keyframes victoryPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(79, 172, 254, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Config Panel -->
+    <div id="config-panel">
+        <h1>🎮 Level Builder</h1>
+
+        <!-- Load Existing Level Section -->
+        <div class="section">
+            <h2>📁 Load Existing Level</h2>
+            <div class="form-group">
+                <label>Start from existing level</label>
+                <select id="level-selector" onchange="loadExistingLevel(this.value)">
+                    <option value="">-- New Level --</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- JSON Editor Section -->
+        <div class="section">
+            <h2>{ } JSON Editor</h2>
+            <div class="form-group">
+                <label>Edit level JSON directly (changes sync with UI)</label>
+                <textarea id="json-editor" rows="10" style="font-family: 'Courier New', monospace; font-size: 11px;" oninput="debouncedApplyJson()"></textarea>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button class="btn" onclick="applyJsonToUI()" style="flex: 1;">↻ Apply JSON to UI Now</button>
+                    <button class="btn" onclick="copyJsonToClipboard()" style="flex: 1;">📋 Copy JSON</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Basic Info Section -->
+        <div class="section">
+            <h2>📋 Basic Info</h2>
+            <div class="form-group">
+                <label>Level Name</label>
+                <input type="text" id="level-name" value="The Void" placeholder="Enter level name">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="level-desc" placeholder="Describe the level challenge">Basic bubble popping in zero-G. Get a feel for the physics.</textarea>
+            </div>
+        </div>
+
+        <!-- Game Parameters Section -->
+        <div class="section">
+            <h2>⚙️ Game Parameters</h2>
+            <div class="form-group">
+                <label>Target Pops: <span id="target-val">12</span></label>
+                <input type="range" id="target" value="12" min="5" max="45" step="1" oninput="updateSliderValue('target', this.value)">
+            </div>
+            <div class="form-group">
+                <label>Time Limit: <span id="time-val">40</span>s</label>
+                <input type="range" id="time" value="40" min="30" max="60" step="1" oninput="updateSliderValue('time', this.value)">
+            </div>
+            <div class="form-group">
+                <label>Bubble Count: <span id="count-val">15</span></label>
+                <input type="range" id="count" value="15" min="5" max="45" step="1" oninput="updateSliderValue('count', this.value)">
+            </div>
+            <div class="form-group">
+                <label>Bubble Size: <span id="size-val">1.2</span></label>
+                <input type="range" id="size" value="1.2" min="0.5" max="1.5" step="0.05" oninput="updateSliderValue('size', this.value)">
+            </div>
+            <div class="form-group">
+                <label>Gravity: <span id="gravity-val">0.00008</span></label>
+                <input type="range" id="gravity" value="0.00008" min="0.00001" max="0.001" step="0.00005" oninput="updateSliderValue('gravity', this.value)">
+            </div>
+            <div class="form-group">
+                <label>Spawn Radius: <span id="spawn-radius-val">8</span></label>
+                <input type="range" id="spawn-radius" value="8" min="5" max="15" step="0.5" oninput="updateSliderValue('spawn-radius', this.value)">
+            </div>
+            <div class="form-group">
+                <label>Camera Zoom: <span id="camera-zoom-val">60</span> <small style="color: #888;">(higher = wider view)</small></label>
+                <input type="range" id="camera-zoom" value="60" min="20" max="60" step="1" oninput="updateSliderValue('camera-zoom', this.value)">
+            </div>
+            <div class="form-group inline-group">
+                <input type="checkbox" id="auto-rotate" checked>
+                <label>Auto Rotate Camera</label>
+            </div>
+            <div class="form-group">
+                <label>Bubble Color</label>
+                <input type="color" id="color" value="#ffff00">
+            </div>
+            <div class="form-group inline-group">
+                <input type="checkbox" id="respawn-bubbles">
+                <label>Respawn Bubbles</label>
+            </div>
+            <div class="form-group">
+                <label>Respawn Rate: <span id="respawn-rate-val">2</span>s</label>
+                <input type="range" id="respawn-rate" value="2" min="0.5" max="10" step="0.5" oninput="updateSliderValue('respawn-rate', this.value)">
+            </div>
+        </div>
+
+        <!-- Hazards Section -->
+        <div class="section">
+            <h2>☄️ Hazards (max 2)</h2>
+            <div id="hazards-list"></div>
+            <button class="btn btn-block" id="add-hazard" onclick="addHazard()">+ Add Hazard</button>
+            <p class="warning" id="hazard-warning" style="display: none;">Maximum 2 hazards allowed. If using 2, they must be the same type.</p>
+        </div>
+
+        <!-- Special Bubbles Section -->
+        <div class="section">
+            <h2>✨ Special Bubbles (max 2 types)</h2>
+            <div class="form-group inline-group">
+                <input type="checkbox" id="special-enabled">
+                <label>Enable Special Bubbles</label>
+            </div>
+            <div id="special-config" style="display: none;">
+                <div class="form-group">
+                    <label>Spawn Interval: <span id="special-interval-val">5</span>s</label>
+                    <input type="range" id="special-interval" value="5" min="2" max="15" step="0.5" oninput="updateSliderValue('special-interval', this.value)">
+                </div>
+                <div id="special-types-list"></div>
+                <p class="warning" id="special-warning" style="display: none;">Maximum 2 special bubble types allowed.</p>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+            <button class="btn btn-block" onclick="exportJSON()">💾 Export JSON</button>
+        </div>
+    </div>
+
+    <!-- Play Area -->
+    <div id="play-area">
+        <div class="status" id="status">Configure your level and click "Rebuild Level" to preview</div>
+        
+        <div id="play-controls">
+            <button class="btn" id="apply-btn" onclick="applyLevel()">🔨 Rebuild Level</button>
+        </div>
+
+        <div id="game-container">
+            <canvas id="game-canvas" style="display: none;"></canvas>
+            <iframe id="game-iframe" src="/index.html?embed=true"></iframe>
+            <div id="victory-banner" class="victory-banner" onclick="restartLevel()">
+                <span class="emoji">🎉</span>
+                <div class="message">VICTORY!</div>
+                <div class="prompt">Click here or "Restart" to play again</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Bubbles & Hazards Config -->
+    <script src="/js/specialbubbles.js"></script>
+    <script src="/js/hazards.js"></script>
+
+    <!-- Builder Script -->
+    <script src="/js/builder.js"></script>
+    <script>
+        // Initialize builder on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

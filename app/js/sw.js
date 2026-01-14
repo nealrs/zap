@@ -3,7 +3,7 @@
  * Enables offline functionality and PWA installation
  */
 
-const CACHE_VERSION = 'bubble-zap-v4';
+const CACHE_VERSION = 'bubble-zap-v1.0.0';
 const CACHE_NAME = `${CACHE_VERSION}-assets`;
 
 // Static assets to cache on install
@@ -11,13 +11,32 @@ const STATIC_ASSETS = [
   './',
   './index.html',
   './js/game.js',
+  './js/bubble-utils.js',
   './js/specialbubbles.js',
   './js/hazards.js',
+  './js/soundtrack.js',
+  './js/audio-manager.js',
+  './js/version.js',
+  './audio/pop.wav',
+  './audio/fail.wav',
+  './audio/soundtrack-level-0.wav',
+  './audio/soundtrack-level-1.wav',
+  './audio/soundtrack-level-2.wav',
+  './audio/soundtrack-level-3.wav',
+  './audio/soundtrack-level-4.wav',
+  './audio/soundtrack-level-5.wav',
+  './audio/soundtrack-level-6.wav',
+  './audio/soundtrack-level-7.wav',
+  './audio/soundtrack-level-8.wav',
+  './audio/soundtrack-level-9.wav',
   './data/levels.json',
   './data/specialbubbles.json',
   './data/hazards.json',
   './data/config.json',
   './assets/manifest.json',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
+  './assets/favicon.ico',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
   'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'
 ];
